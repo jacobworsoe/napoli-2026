@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Rejseplan – Napoli & Amalfikysten 2026</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root {
+      --napoli:  #c0392b;
+      --agri:    #27ae60;
+      --amalfi:  #2980b9;
+      --gold:    #f39c12;
+      --cream:   #fdf6ec;
+      --dark:    #2c2c2c;
+      --muted:   #7f8c8d;
+      --shadow:  0 2px 12px rgba(0,0,0,.09);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--cream); color: var(--dark); line-height: 1.6; }
+
+    /* ── Header ── */
+    header { background: linear-gradient(135deg,#8b1a1a 0%,#c0392b 50%,#e74c3c 100%); color:#fff; padding:2.5rem 1.5rem 2rem; text-align:center; }
+    header h1 { font-size:2rem; letter-spacing:.5px; }
+    header p  { opacity:.85; margin-top:.4rem; font-size:1.05rem; }
+    .trip-meta { display:flex; flex-wrap:wrap; justify-content:center; gap:.75rem; margin-top:1.25rem; }
+    .pill { background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); border-radius:999px; padding:.3rem .9rem; font-size:.85rem; }
+
+    /* ── Tabs ── */
+    .tabs { display:flex; flex-wrap:wrap; gap:.5rem; padding:1.2rem 1.5rem .6rem; background:#fff; border-bottom:2px solid #e8ddd0; position:sticky; top:0; z-index:200; }
+    .tab-btn { padding:.45rem 1.1rem; border-radius:999px; border:2px solid transparent; cursor:pointer; font-size:.9rem; font-weight:600; transition:all .2s; background:#f0ebe4; color:var(--muted); }
+    .tab-btn:hover { opacity:.8; }
+    .tab-btn.active-napoli  { background:var(--napoli); color:#fff; }
+    .tab-btn.active-agri    { background:var(--agri);   color:#fff; }
+    .tab-btn.active-amalfi  { background:var(--amalfi); color:#fff; }
+    .tab-btn.active-info    { background:var(--gold);   color:#fff; }
+
+    /* ── Map panel ── */
+    #map-panel { background:#fff; border-bottom:2px solid #e8ddd0; }
+    #map-toggle { width:100%; padding:.55rem 1.5rem; background:#f7f3ee; border:none; border-bottom:1px solid #e8ddd0; cursor:pointer; font-size:.85rem; color:var(--muted); text-align:left; display:flex; align-items:center; gap:.5rem; }
+    #map-toggle:hover { background:#f0ebe4; }
+    #map-toggle .map-chev { transition:transform .25s; }
+    #map-panel.map-open #map-toggle .map-chev { transform:rotate(180deg); }
+    #map-container { display:none; height:340px; }
+    #map-panel.map-open #map-container { display:block; }
+    #map { height:100%; }
+    .map-legend { display:flex; flex-wrap:wrap; gap:.5rem; padding:.5rem 1rem; background:#f7f3ee; font-size:.78rem; }
+    .legend-item { display:flex; align-items:center; gap:.3rem; }
+    .legend-dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+
+    /* ── Sections ── */
+    .section { display:none; padding:1.5rem; max-width:880px; margin:0 auto; }
+    .section.active { display:block; }
+
+    /* ── Phase heading ── */
+    .phase-heading { border-left:5px solid; padding-left:.9rem; margin-bottom:1.25rem; }
+    .phase-heading h2 { font-size:1.5rem; }
+    .phase-heading p  { color:var(--muted); font-size:.9rem; margin-top:.2rem; }
+    .napoli-border { border-color:var(--napoli); }
+    .agri-border   { border-color:var(--agri);   }
+    .amalfi-border { border-color:var(--amalfi); }
+    .info-border   { border-color:var(--gold);   }
+
+    /* ── Day card ── */
+    .day-card { background:#fff; border-radius:12px; box-shadow:var(--shadow); margin-bottom:1rem; overflow:hidden; }
+    .day-header { display:flex; align-items:center; gap:.8rem; padding:.9rem 1.2rem; cursor:pointer; user-select:none; transition:background .15s; }
+    .day-header:hover { background:#faf6f1; }
+    .day-num { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; color:#fff; flex-shrink:0; }
+    .napoli-bg { background:var(--napoli); }
+    .agri-bg   { background:var(--agri);   }
+    .amalfi-bg { background:var(--amalfi); }
+    .travel-bg { background:#7f8c8d;        }
+    .day-title { flex:1; }
+    .day-title h3 { font-size:1rem; }
+    .day-title small { color:var(--muted); font-size:.82rem; }
+    .chevron { font-size:1.1rem; color:var(--muted); transition:transform .25s; }
+    .day-card.open .chevron { transform:rotate(180deg); }
+    .day-body { display:none; padding:.2rem 1.2rem 1.2rem; border-top:1px solid #f0ebe4; }
+    .day-card.open .day-body { display:block; }
+
+    /* ── Time blocks ── */
+    .time-block { display:flex; gap:.9rem; margin-top:.9rem; align-items:flex-start; }
+    .time-label { min-width:68px; font-size:.78rem; font-weight:700; color:var(--muted); padding-top:.15rem; text-align:right; text-transform:uppercase; }
+    .time-content { flex:1; }
+    .time-content strong { display:block; font-size:.97rem; margin-bottom:.2rem; }
+    .time-content p { font-size:.88rem; color:#444; }
+
+    /* ── Two-option layout ── */
+    .options { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-top:.9rem; }
+    @media(max-width:580px){ .options { grid-template-columns:1fr; } }
+    .opt { border-radius:10px; padding:.9rem 1rem; border:2px solid transparent; }
+    .opt-a { background:#f0faf4; border-color:#27ae60; }
+    .opt-b { background:#eaf3fb; border-color:#2980b9; }
+    .opt-label { font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:.35rem; }
+    .opt-a .opt-label { color:#27ae60; }
+    .opt-b .opt-label { color:#2980b9; }
+    .opt strong { display:block; font-size:.93rem; margin-bottom:.25rem; }
+    .opt p { font-size:.84rem; color:#444; }
+    .opt ul { font-size:.84rem; color:#444; padding-left:1rem; }
+    .opt li { margin-bottom:.15rem; }
+
+    /* ── Badges ── */
+    .badge { display:inline-block; padding:.15rem .55rem; border-radius:999px; font-size:.72rem; font-weight:700; margin-left:.4rem; vertical-align:middle; }
+    .badge-booked  { background:#e8f8f5; color:#1abc9c; border:1px solid #1abc9c; }
+    .badge-tip     { background:#fef9e7; color:#f39c12; border:1px solid #f39c12; }
+    .badge-warning { background:#fdedec; color:#e74c3c; border:1px solid #e74c3c; }
+    .badge-option  { background:#eaf2fb; color:#2980b9; border:1px solid #2980b9; }
+
+    /* ── Tip / warning boxes ── */
+    .tip-box { background:#fef9e7; border-left:4px solid var(--gold); border-radius:0 8px 8px 0; padding:.7rem 1rem; margin-top:.9rem; font-size:.87rem; }
+    .warning-box { background:#fdedec; border-left:4px solid var(--napoli); border-radius:0 8px 8px 0; padding:.7rem 1rem; margin-top:.9rem; font-size:.87rem; }
+    .tip-box strong, .warning-box strong { display:block; margin-bottom:.3rem; }
+
+    /* ── Town cards (Amalfi 5 byer) ── */
+    .town-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:.75rem; margin:1rem 0 1.5rem; }
+    .town-card { background:#fff; border-radius:10px; padding:.9rem 1rem; box-shadow:var(--shadow); border-top:4px solid var(--amalfi); }
+    .town-card h4 { font-size:.95rem; margin-bottom:.3rem; }
+    .town-card .tag { font-size:.72rem; font-weight:700; color:var(--amalfi); text-transform:uppercase; letter-spacing:.4px; display:block; margin-bottom:.25rem; }
+    .town-card p { font-size:.81rem; color:#555; }
+
+    /* ── Info grid ── */
+    .info-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; margin-top:1rem; }
+    .info-card { background:#fff; border-radius:12px; padding:1.1rem 1.2rem; box-shadow:var(--shadow); }
+    .info-card h4 { font-size:.95rem; margin-bottom:.5rem; }
+    .info-card p, .info-card li { font-size:.85rem; color:#444; line-height:1.55; }
+    .info-card ul { padding-left:1.1rem; }
+    .info-card li { margin-bottom:.2rem; }
+
+    /* ── Controls ── */
+    .controls { display:flex; gap:.6rem; margin-bottom:.8rem; }
+    .ctrl-btn { padding:.3rem .8rem; border-radius:6px; border:1px solid #d5c9bc; background:#fff; cursor:pointer; font-size:.82rem; color:var(--muted); }
+    .ctrl-btn:hover { background:#f0ebe4; }
+
+    footer { text-align:center; padding:2rem 1rem; color:var(--muted); font-size:.82rem; }
+
+    @media(max-width:600px){
+      header h1 { font-size:1.5rem; }
+      .tabs { padding:.8rem 1rem .4rem; }
+      .section { padding:1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>&#127757; Napoli &amp; Amalfikysten</h1>
+  <p>Familietur · Maj 2026</p>
+  <div class="trip-meta">
+    <span class="pill">&#9992;&#65039; BLL &#8594; NAP · 3. maj 18:45</span>
+    <span class="pill">&#128106; 2 voksne + 3 piger (10, 7 &amp; 3 år)</span>
+    <span class="pill">11 nætter · 3 hoteller</span>
+    <span class="pill">&#9992;&#65039; NAP &#8594; BLL · 14. maj 15:50</span>
+  </div>
+</header>
+
+<!-- TABS -->
+<nav class="tabs">
+  <button class="tab-btn active-napoli" onclick="showTab('napoli',this)">&#127987;&#65039; Napoli (3–8 maj)</button>
+  <button class="tab-btn" onclick="showTab('agri',this)">&#127807; Agriturismo (8–10 maj)</button>
+  <button class="tab-btn" onclick="showTab('amalfi',this)">&#9981;&#65039; Amalfi (10–14 maj)</button>
+  <button class="tab-btn" onclick="showTab('info',this)">&#128203; Praktisk info</button>
+</nav>
+
+<!-- MAP PANEL -->
+<div id="map-panel">
+  <button id="map-toggle" onclick="toggleMap()">
+    <span>&#128506;&#65039; Vis kort</span>
+    <span class="map-chev">&#9660;</span>
+  </button>
+  <div id="map-container">
+    <div id="map"></div>
+    <div class="map-legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#c0392b"></span> Napoli-fase</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#27ae60"></span> Agriturismo-fase</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#2980b9"></span> Amalfi-fase</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#8e44ad"></span> Dagsture</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#f39c12"></span> Hoteller</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ NAPOLI ══════════════════════ -->
+<section id="napoli" class="section active">
+  <div class="phase-heading napoli-border">
+    <h2>Napoli</h2>
+    <p>Hotel: Splendido Loft nel Cuore Antico · Via Pasquale Scura 37, 80133 Napoli · 3–8 maj</p>
+  </div>
+  <div class="controls">
+    <button class="ctrl-btn" onclick="expandAll('napoli')">Udvid alle</button>
+    <button class="ctrl-btn" onclick="collapseAll('napoli')">Kollaps alle</button>
+  </div>
+
+  <!-- DAY 1 -->
+  <div class="day-card" id="n-day1">
+    <div class="day-header" onclick="toggleDay('n-day1')">
+      <div class="day-num travel-bg">1</div>
+      <div class="day-title"><h3>Søndag 3. maj – Ankomstdag</h3><small>Flyv fra Billund kl. 18:45 · Ankomst Napoli ~22:00</small></div>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="day-body">
+      <div class="time-block">
+        <div class="time-label">Eftermiddag</div>
+        <div class="time-content"><strong>Klar til afgang fra Billund</strong>
+          <p>Afrejse kl. 18:45 fra BLL. Tjek ind online senest 24 timer før. Tag snacks og underholdning til børnene.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Aften ~22:00</div>
+        <div class="time-content"><strong>Ankomst Napoli Capodichino (NAP)</strong>
+          <p>Taxi til hotellet: insistér på taxameter eller aftalt fast pris (ca. €20–25). <em>Alibus</em> er billig men ikke ideel med bagage og trætte børn sent om aftenen.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Sen aften</div>
+        <div class="time-content"><strong>Indkvartering + hurtig pizza</strong>
+          <p>Napoli er levende til midnat. En hurtig pizza i nærheden af hotellet og tidlig sengetid. Hotellet på Via Pasquale Scura ligger midt i det historiske center, tæt på Spaccanapoli.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 2 -->
+  <div class="day-card" id="n-day2">
+    <div class="day-header" onclick="toggleDay('n-day2')">
+      <div class="day-num napoli-bg">2</div>
+      <div class="day-title"><h3>Mandag 4. maj – Det ægte Napoli</h3><small>Spaccanapoli · San Gregorio Armeno · Castel dell'Ovo</small></div>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="day-body">
+      <div class="time-block">
+        <div class="time-label">Morgen</div>
+        <div class="time-content"><strong>Morgenmad som en napolitaner</strong>
+          <p>Cornetto og cappuccino i en lokal bar – ikke en turistcafé. Find en bar med lokale ved bardisken. Betaling ved kassen, så henter man selv ved disken – sådan gør man i Napoli.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Formiddag</div>
+        <div class="time-content"><strong>Spaccanapoli + San Gregorio Armeno</strong>
+          <p>Gå den lange Spaccanapoli-akse igennem det historiske center. <strong>San Gregorio Armeno</strong> er "julekribbegaden" – hele året sælges håndlavede figurer, fra helgener til fodboldspillere. Børnene elsker det og det er gratis at gå igennem.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Frokost</div>
+        <div class="time-content"><strong>Ægte neapolitansk pizza <span class="badge badge-warning">Undgå turistfælder</span></strong>
+          <p><strong>L'Antica Pizzeria da Michele</strong> (Via Cesare Sersale 1) eller <strong>Pizzeria Sorbillo</strong> (Via dei Tribunali 32). Begge steder er legender med kø, men kø er et godt tegn. Undgå steder med menuer på 12 sprog og billeder.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Eftermiddag</div>
+        <div class="time-content"><strong>Castel dell'Ovo – den gratis haveborg</strong>
+          <p>Gå ned til havnen og ud til borgøen. Gratis adgang, fantastisk udsigt over bugten og Vesuvius. Masser af plads til børn at løbe. Ca. 15 minutters gang fra hotellet.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Eftermiddag</div>
+        <div class="time-content"><strong>Chiaia + Lungomare + Villa Comunale</strong>
+          <p>Gå langs strandpromenaden til Chiaia – sikkert og pænt kvarter. <strong>Villa Comunale</strong>-parken har legeplads til den yngste og fin udsigt. God til en afslappet eftermiddag med is.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Aften</div>
+        <div class="time-content"><strong>Aftensmad i Chiaia</strong>
+          <p>Chiaia er et af Napolis sikreste og hyggeligste kvarterer om aftenen. Mange gode lokale restauranter. Gå hjem ad Lungomare med Vesuvius i aftenshorisonten.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 3 -->
+  <div class="day-card" id="n-day3">
+    <div class="day-header" onclick="toggleDay('n-day3')">
+      <div class="day-num napoli-bg">3</div>
+      <div class="day-title"><h3>Tirsdag 5. maj – Hop-on Hop-off <span class="badge badge-booked">BOOKET</span></h3><small>24-timers billet · Start Piazza Municipio kl. 9:30</small></div>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="day-body">
+      <div class="time-block">
+        <div class="time-label">09:30</div>
+        <div class="time-content"><strong>Start ved Castel Nuovo / Piazza Municipio</strong>
+          <p>Mød op lidt inden kl. 9:30 ved <strong>Parco Castello, Piazza Municipio</strong> – ca. 15 minutters gang fra hotellet (eller kort taxa). Hent mobilbilletter i GetYourGuide-appen. Download også Sightseeing Experience-appen for live busposition.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Formiddag</div>
+        <div class="time-content"><strong>Linje A (rød) – hel runde for overblik</strong>
+          <p>45 minutters runde: Castel Nuovo → Via Toledo → Piazza del Plebiscito → Castel dell'Ovo → Mergellina. Kør en hel runde for at orientere jer, og hop af bagefter ved de bedste steder.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Formiddag</div>
+        <div class="time-content"><strong>Stop: Piazza del Plebiscito <span class="badge badge-warning">Turistfælde</span></strong>
+          <p>Pladsen er smuk og gratis. <em>Spis ikke på restauranterne direkte ved pladsen</em> – turistpriser, middelmådig mad. Gå to gader væk for bedre og billigere.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Frokost</div>
+        <div class="time-content"><strong>Mergellina – is og snacks</strong>
+          <p>Hyggelig havnepromenade. Prøv <em>sfogliatella</em> og granita ved en lokal snackbar. Børnevenlig atmosfære med udsigt til havet.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Eftermiddag</div>
+        <div class="time-content"><strong>Linje B (blå) – Posillipo og panoramaudsigter</strong>
+          <p>70 minutters runde op til de fine Posillipo-kvarterer. Stop ved <strong>Parco Virgiliano</strong> for spektakulær 360°-udsigt over Napoli-bugten, Vesuvius, Ischia og Capri. Fantastisk til familiefoto.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Aften</div>
+        <div class="time-content"><strong>Aftensmad på Via dei Tribunali</strong>
+          <p>Hjem til det historiske center. Via dei Tribunali er fuld af gode pizzeriaer og trattoriaer – det er her de lokale spiser. Levende og trygt atmosfære hele aftenen.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 4 -->
+  <div class="day-card" id="n-day4">
+    <div class="day-header" onclick="toggleDay('n-day4')">
+      <div class="day-num napoli-bg">4</div>
+      <div class="day-title"><h3>Onsdag 6. maj – Città della Scienza <span class="badge badge-booked">BOOKET</span></h3><small>Interaktivt videnskabsmuseum · Via Coroglio 57/104</small></div>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="day-body">
+      <div class="time-block">
+        <div class="time-label">Morgen</div>
+        <div class="time-content"><strong>Transport til museet i Bagnoli</strong>
+          <p>Bus 606 fra centro eller taxa (~€10–15). Åbningstid typisk 9:00–17:00. <em>Husk: ombyt kuponer i billetkontoret ved ankomst!</em> Museet har cafeteria, planetarium og videnskabsbutik.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Formiddag</div>
+        <div class="time-content"><strong>Città della Scienza – mindst 2–3 timer</strong>
+          <p>Fantastisk interaktivt museum med hands-on eksperimenter. Alle tre piger vil elske det. Planetarium er separat billet men anbefales til de ældste to.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Frokost</div>
+        <div class="time-content"><strong>Frokost i cafeteria eller Bagnoli</strong>
+          <p>Bagnoli er et rigtig lokalt arbejderkvarter – god autentisk mad til fornuftige priser, langt fra turistfælderne.</p></div>
+      </div>
+      <div class="options">
+        <div class="opt opt-a">
+          <div class="opt-label">&#9679; Mulighed A</div>
+          <strong>Bagnoli-kysten om eftermiddagen</strong>
+          <p>Kystlinjen ved Bagnoli er ret uberørt. God til en uformel gåtur eller leg ved vandet. Rolig og lokal stemning.</p>
+        </div>
+        <div class="opt opt-b">
+          <div class="opt-label">&#9679; Mulighed B</div>
+          <strong>Tilbage til centro + Lungomare</strong>
+          <p>Tag taxa hjem og slut dagen med en afslappet gåtur langs Lungomare og is ved Mergellina. Nem og tryg eftermiddag.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 5 -->
+  <div class="day-card" id="n-day5">
+    <div class="day-header" onclick="toggleDay('n-day5')">
+      <div class="day-num napoli-bg">5</div>
+      <div class="day-title"><h3>Torsdag 7. maj – Dagsudflugt: Ischia &#127958;&#65039;</h3><small>Færge fra Molo Beverello · 10 minutters gang fra hotellet</small></div>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="day-body">
+      <div class="time-block">
+        <div class="time-label">08:30</div>
+        <div class="time-content"><strong>Færge fra Molo Beverello <span class="badge badge-tip">Tæt på hotellet!</span></strong>
+          <p>Molo Beverello er kun 10 minutters gang fra Via Pasquale Scura. Hurtigfærge (aliscafo) til Ischia Porto tager 45–55 min. Rederier: Caremar, Medmar, SNAV. Billetter online eller ved kassen. Pris ca. €15–20/voksen, børn billigere. Tag tidlig afgang for at få mest ud af dagen.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Formiddag</div>
+        <div class="time-content"><strong>Castel Aragonese i Ischia Ponte <span class="badge badge-tip">Børneelskeren!</span></strong>
+          <p>Imponerende middelalderborg på en lille klippeø forbundet med en bro. Entré ca. €10/voksen. En af øens absolut bedste seværdigheder – og børnene elsker borge.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Frokost</div>
+        <div class="time-content"><strong>Frokost i Ischia Ponte</strong>
+          <p>Landsbyen ved borgen er charmerende med gode restauranter. Frisk fisk og skaldyr er specialiteten.</p></div>
+      </div>
+      <div class="options">
+        <div class="opt opt-a">
+          <div class="opt-label">&#9679; Mulighed A – Strand</div>
+          <strong>Citara-stranden i Forio</strong>
+          <p>Ischia Porto → bus til Forio. Citara er en af øens smukkeste strande. Havtemperatur i maj: 18–20°C – frisk men muligt! Giardini Poseidon termbade er her (dyre men smukke).</p>
+        </div>
+        <div class="opt opt-b">
+          <div class="opt-label">&#9679; Mulighed B – Øen rundt</div>
+          <strong>Bustur rundt på øen</strong>
+          <p>Linje 1 og 2 kører rundt om hele øen. Hop af i Sant'Angelo (hyggelig fiskerby), Serrara Fontana (bjerglandsby med udsigt) og Casamicciola (termiske bade).</p>
+        </div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Sen eftermiddag</div>
+        <div class="time-content"><strong>Færge tilbage til Napoli</strong>
+          <p>Sidste hurtigfærge ca. 19:00–20:00 (tjek aktuelle tider). Aftensmad i Napoli ved hjemkomst.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 6 -->
+  <div class="day-card" id="n-day6">
+    <div class="day-header" onclick="toggleDay('n-day6')">
+      <div class="day-num travel-bg">6</div>
+      <div class="day-title"><h3>Fredag 8. maj – Flyt til Agriturismo</h3><small>Check-ud fra Napoli · Sydover mod landet</small></div>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="day-body">
+      <div class="time-block">
+        <div class="time-label">Morgen</div>
+        <div class="time-content"><strong>Morgenmad + pak tasker</strong>
+          <p>Nyd den sidste morgenmad i Napoli. Tjek ud og gem bagagen i receptionen hvis I vil se mere inden afrejse.</p></div>
+      </div>
+      <div class="options">
+        <div class="opt opt-a">
+          <div class="opt-label">&#9679; Mulighed A – Direkte afsted</div>
+          <strong>Kør tidligt mod Agriturismo</strong>
+          <p>God mulighed for at nå frem i god tid, slå jer ned, udforske gårdens omgivelser og hvile ud. Giver en rolig indkøring til opholdet.</p>
+        </div>
+        <div class="opt opt-b">
+          <div class="opt-label">&#9679; Mulighed B – Herculaneum på vejen</div>
+          <strong>Stop ved Herculaneum (Ercolano)</strong>
+          <p>Mindre og bedre bevaret end Pompeii – 2 timer er nok. Lettere med børn end det store Pompeii-kompleks. Ligger direkte på vejen sydover (motorvej A3). Entré ca. €13/voksen.</p>
+        </div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Eftermiddag</div>
+        <div class="time-content"><strong>Ankomst Agriturismo Vivi Natura</strong>
+          <p>Udpak, udforsk gården og sæt jer ind i omgivelserne. De fleste agritourismos serverer hjemmelavet aftensmad – en fantastisk oplevelse for hele familien med lokale råvarer.</p></div>
+      </div>
+      <div class="tip-box">
+        <strong>&#128161; Lej bil fra Napoli</strong>
+        Fra og med denne dag er en lejebil stærkt anbefalet. Giver total fleksibilitet til Pompeii, Vesuvius og Amalfikysten. Book på forhånd og hent i Napoli. Husk: kørsel i Napoli by er kaotisk – det er nemmere at hente bilen ved lufthavnen efter ankomst eller just inden afrejse fra by-hotellet.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ AGRITURISMO ══════════════════ -->
+<section id="agri" class="section">
+  <div class="phase-heading agri-border">
+    <h2>Agriturismo</h2>
+    <p>Hotel: Azienda Agrituristica Vivi Natura · 8–10 maj · Tæt på Pompeii og Vesuvius</p>
+  </div>
+  <div class="controls">
+    <button class="ctrl-btn" onclick="expandAll('agri')">Udvid alle</button>
+    <button class="ctrl-btn" onclick="collapseAll('agri')">Kollaps alle</button>
+  </div>
+
+  <!-- DAY 7 -->
+  <div class="day-card" id="a-day7">
+    <div class="day-header" onclick="toggleDay('a-day7')">
+      <div class="day-num agri-bg">7</div>
+      <div class="day-title"><h3>Lørdag 9. maj – Pompeii &amp; Vesuvius</h3><small>Valg: En hel dag ved Pompeii · eller Pompeii + Vesuvius kombineret</small></div>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="day-body">
+      <div class="time-block">
+        <div class="time-label">Morgen</div>
+        <div class="time-content"><strong>Tidlig start – ankomst ved Pompeii kl. 8:30</strong>
+          <p>Pompeii er et kæmpe areal (66 hektar). <em>Ankomst tidligt er afgørende</em> – om formiddagen er der langt færre turister, og det er køligere. Køb billetter online på forhånd (officielt site: pompeiisite.org) for at undgå kø. Tag rigeligt med vand og snacks – der er begrænset mad inden for selve ruinerne.</p></div>
+      </div>
+      <div class="options">
+        <div class="opt opt-a">
+          <div class="opt-label">&#9679; Mulighed A – Kun Pompeii (hel dag)</div>
+          <strong>Fordyb jer i Pompeii</strong>
+          <ul>
+            <li>Entré: ca. €16/voksen, børn under 18 år gratis (EU-statsborgere)</li>
+            <li>Vigtigste steder: Forum, Huset af Faun, Lupanar, Bagte brodkager, Termerne, Amphiteatret</li>
+            <li>Brug 3–4 timer – det er nok med børn</li>
+            <li>Medbragt frokost eller tag ud og spis i Pompei-by (ikke turistrestauranterne lige ved indgangen)</li>
+            <li>Perfekt hvis den 3-årige trænger til pauser og fri leg</li>
+          </ul>
+        </div>
+        <div class="opt opt-b">
+          <div class="opt-label">&#9679; Mulighed B – Pompeii + Vesuvius</div>
+          <strong>Kombiner begge seværdigheder</strong>
+          <ul>
+            <li>Pompeii kl. 8:30–12:00 (kompakt rute: Forum, Huset af Faun, Amphitheater)</li>
+            <li>Kør op til Vesuvius kl. 13:00 (ca. 25 min kørsel)</li>
+            <li>Parkér ved P-plads, gå 30 min op til kraterkanten (700 m sti)</li>
+            <li>Entré Vesuvius: ca. €10/person · Udsigten er uovertruffen</li>
+            <li>NB: Stien er stejl og gruset – den 3-årige skal bæres eller sidde i bæresele</li>
+          </ul>
+        </div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Aften</div>
+        <div class="time-content"><strong>Aftensmad på gården</strong>
+          <p>Tilbage til Vivi Natura til hjemmelavet agriturismo-middag med gårdens egne råvarer. En aften til at lade op.</p></div>
+      </div>
+      <div class="tip-box">
+        <strong>&#128161; Tips til Pompeii med børn</strong>
+        Tag et lydguide-set (lejes ved indgangen) eller en børnevenlig guidebog. Støvsuger-heden kan gøre den 3-årige træt – hat, solcreme og vand er vigtige. De "størknet" menneskefigurer (gibsafstøbninger) fascinerer og giver naturlige anledninger til at tale om historien.
+      </div>
+      <div class="warning-box">
+        <strong>&#9888;&#65039; Undgå uofficielle guides ved Pompeii</strong>
+        Ved indgangen tilbyder folk sig som guides – kun officielt licenserede guides er troværdige. Book evt. en officiel guide på forhånd via pompeiisite.org.
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 8 move -->
+  <div class="day-card" id="a-day8">
+    <div class="day-header" onclick="toggleDay('a-day8')">
+      <div class="day-num travel-bg">8</div>
+      <div class="day-title"><h3>Søndag 10. maj – Flyt til Amalfi</h3><small>Kystvejen SS163 · Check-ind Hotel La Pergola</small></div>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="day-body">
+      <div class="time-block">
+        <div class="time-label">Morgen</div>
+        <div class="time-content"><strong>Morgenmad + check-ud fra gården</strong>
+          <p>Pak og tag afsked med gårdens dyr og ro. Sæt afsted i god tid, da kystvejen kan tage tid.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Formiddag</div>
+        <div class="time-content"><strong>Kørsel langs Amalfikysten (SS163) <span class="badge badge-tip">Spektakulær køretur!</span></strong>
+          <p>En af Italiens smukkeste og mest dramatiske køreture. Smal, kurvet og med høje klipper mod havet. Kør langsomt og hold ind til siden for busser. Der er masser af steder at stoppe og nyde udsigten – vær impulsive!</p></div>
+      </div>
+      <div class="options">
+        <div class="opt opt-a">
+          <div class="opt-label">&#9679; Mulighed A – Stop i Positano</div>
+          <strong>Positano til frokost</strong>
+          <p>Parkér i toppen og gå ned til den farverige by. Unikke farverige huse i klippesiden. Spiaggia Grande er strandlivet. Lidt dyrt men stemningsmæssigt uovertruffen. God appetitåbner til resten af kysten.</p>
+        </div>
+        <div class="opt opt-b">
+          <div class="opt-label">&#9679; Mulighed B – Stop i Praiano</div>
+          <strong>Praiano – det stille alternativ</strong>
+          <p>Praiano er Positanos stille søster – smuk, mindre turistet og med en hyggelig lokal stemning. Marina di Praia er en lille ø-agtig fjordbugtig med klart vand. Frokost her er mere autentisk og billigere.</p>
+        </div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Eftermiddag</div>
+        <div class="time-content"><strong>Ankomst Amalfi + check-ind Hotel La Pergola</strong>
+          <p>G. Augustariccio 14, Amalfi. Pak ud og tag en første spadseretur i Amalfi by – kompakt og let at navigere. Domkirken er imponerende selv udefra.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Aften</div>
+        <div class="time-content"><strong>Aftensmad i Amalfi</strong>
+          <p>Piazza del Duomo er det sociale centrum. Undgå restauranterne direkte ved domkirken – gå ad en sidegade for bedre og billigere mad.</p></div>
+      </div>
+      <div class="warning-box">
+        <strong>&#9888;&#65039; Kørsel på Amalfikysten</strong>
+        SS163 er smal med mange turistbusser. Aldrig stresset kørsel. Er I ikke trygge: SITA-bus fra Sorrento til Amalfi er et solidt alternativ – de lokale chauffører kender vejen ud og ind.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ AMALFI ══════════════════════ -->
+<section id="amalfi" class="section">
+  <div class="phase-heading amalfi-border">
+    <h2>Amalfikysten</h2>
+    <p>Hotel: La Pergola · G. Augustariccio 14, Amalfi · 10–14 maj</p>
+  </div>
+
+  <!-- 5 BYER GUIDE -->
+  <h3 style="font-size:1rem; margin-bottom:.75rem; color:var(--amalfi);">&#127757; De 5 byer I bør se på Amalfikysten</h3>
+  <div class="town-grid">
+    <div class="town-card">
+      <span class="tag">&#11088; Ikonisk</span>
+      <h4>Positano</h4>
+      <p>Verdens mest fotograferede kystby. Farverige huse i klippesiden, Spiaggia Grande, dyre butikker. Turistet men absolut et besøg værd.</p>
+    </div>
+    <div class="town-card">
+      <span class="tag">&#127956; Udsigter</span>
+      <h4>Ravello</h4>
+      <p>Bjergby 350 m over havet. Villa Rufolo og Villa Cimbrone med terrassehaver. Børnevenlig og rolig. Verdens smukkeste udsigt.</p>
+    </div>
+    <div class="town-card">
+      <span class="tag">&#128564; Autentisk</span>
+      <h4>Praiano</h4>
+      <p>Stille og lokal. Marina di Praia er en skøn lille bugt. Få turister og lave priser. God til et roligt frokostsstop.</p>
+    </div>
+    <div class="town-card">
+      <span class="tag">&#127869; Fiskerlandsby</span>
+      <h4>Cetara</h4>
+      <p>Berømt for ansjos og "colatura di alici" (verdens bedste fiskesauce). Autentisk fiskerby, smukke farver, god mad til fornuftige priser.</p>
+    </div>
+    <div class="town-card">
+      <span class="tag">&#128065; Skjult perle</span>
+      <h4>Atrani</h4>
+      <p>Napolis mindste kommune, 500 m fra Amalfi. Ingen turistbusser kan komme ind. Gratis strand, lokale caféer, ikke på alles radar.</p>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn" onclick="expandAll('amalfi')">Udvid alle</button>
+    <button class="ctrl-btn" onclick="collapseAll('amalfi')">Kollaps alle</button>
+  </div>
+
+  <!-- DAY 9 -->
+  <div class="day-card" id="am-day9">
+    <div class="day-header" onclick="toggleDay('am-day9')">
+      <div class="day-num amalfi-bg">9</div>
+      <div class="day-title"><h3>Mandag 11. maj – Ravello + en by til</h3><small>Terrazza dell'Infinito · Valgfrit ekstra stop</small></div>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="day-body">
+      <div class="time-block">
+        <div class="time-label">Formiddag</div>
+        <div class="time-content"><strong>Bus til Ravello (ca. 20 min)</strong>
+          <p>SITA-bus kører regelmæssigt fra Amalfi. Alternativt: taxa. Ravello er et must – og perfekt til en formiddag med børn der kan løbe frit i haverne.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Formiddag</div>
+        <div class="time-content"><strong>Villa Rufolo + Villa Cimbrone</strong>
+          <p><strong>Villa Rufolo</strong> (ca. €7/voksen): Terrassehaver med dramatisk udsigt. Børnene elsker at løbe rundt. <strong>Villa Cimbrone</strong> (ca. €8/voksen): "Uendeligheds-terrassen" – Italiens mest fotograferede udsigt. Tag begge!</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Frokost</div>
+        <div class="time-content"><strong>Frokost i Ravello</strong>
+          <p>Rolig og autentisk atmosfære i Ravello. Find en trattoria i sidegaderne væk fra Villa Rufolo-pladsen.</p></div>
+      </div>
+      <div class="options">
+        <div class="opt opt-a">
+          <div class="opt-label">&#9679; Mulighed A – Atrani eftermiddag</div>
+          <strong>Bus ned til Atrani</strong>
+          <p>Italiens mindste kommune – 500 m fra Amalfi men en helt anden verden. Gratis strand, ingen turistbusser, hyggelige lokale caféer. Perfekt rolig eftermiddag.</p>
+        </div>
+        <div class="opt opt-b">
+          <div class="opt-label">&#9679; Mulighed B – Praiano eftermiddag</div>
+          <strong>Bil til Praiano og Marina di Praia</strong>
+          <p>Den lille skjulte bugt med klart vand og fin strand. Rolig, lokal og smuk. God til børn der gerne vil bade. Kun 10 min kørsel vest for Amalfi.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 10 -->
+  <div class="day-card" id="am-day10">
+    <div class="day-header" onclick="toggleDay('am-day10')">
+      <div class="day-num amalfi-bg">10</div>
+      <div class="day-title"><h3>Tirsdag 12. maj – Positano</h3><small>Den ikoniske kystby · Spiaggia Grande</small></div>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="day-body">
+      <div class="time-block">
+        <div class="time-label">Morgen</div>
+        <div class="time-content"><strong>Transport til Positano</strong>
+          <p>Hurtigbåd fra Amalfi havn (30 min, ca. €10–12 p.p.) – anbefalet, fantastisk udsigt fra havet. Alternativt: SITA-bus (45 min, ca. €2,50 p.p.). Med bil: parkér i toppen og gå ned – P-pladser er dyre og svære at finde.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Formiddag</div>
+        <div class="time-content"><strong>Udforsk Positano</strong>
+          <p>Gå i de smalle farverige gader. Butikker med typisk keramik, linned og citron-produkter. Børnene elsker den labyrintiske by. Gå ned til Spiaggia Grande og nyd udsigten.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Frokost</div>
+        <div class="time-content"><strong>Frokost i Positano <span class="badge badge-warning">Dyrere end ellers</span></strong>
+          <p>Positano er det dyreste sted på kysten. Gå op ad trappegaderne fra strandpladsen for billigere og bedre mad. En granita al limone er et must!</p></div>
+      </div>
+      <div class="options">
+        <div class="opt opt-a">
+          <div class="opt-label">&#9679; Mulighed A – Strand hele eftermiddagen</div>
+          <strong>Spiaggia Grande</strong>
+          <p>Nyd eftermiddagen på Positanos berømte strand. Solsenge udlejes (dyre) eller brug det fri stenstrand-afsnit. Havet er varmt nok i maj til at stikke tæerne i, og børnene vil elske omgivelserne.</p>
+        </div>
+        <div class="opt opt-b">
+          <div class="opt-label">&#9679; Mulighed B – Praiano på hjemvejen</div>
+          <strong>Stop i Praiano inden hjem</strong>
+          <p>Tag bussen videre til Praiano (15 min), udforsk Marina di Praia og nyd en rolig eftermiddag i den stille fiskerbugt. God to-for-en dag for den mere aktive familie.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 11 -->
+  <div class="day-card" id="am-day11">
+    <div class="day-header" onclick="toggleDay('am-day11')">
+      <div class="day-num amalfi-bg">11</div>
+      <div class="day-title"><h3>Onsdag 13. maj – Cetara eller Sorrento</h3><small>Autentisk fiskerby · eller dagsudflugt til Sorrento</small></div>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="day-body">
+      <div class="options">
+        <div class="opt opt-a">
+          <div class="opt-label">&#9679; Mulighed A – Cetara + Minori</div>
+          <strong>Ægte fiskerlandsbytur</strong>
+          <ul>
+            <li>Cetara: berømt for sine ansjoser og <em>colatura di alici</em> (stærkt smagende fiskesauce). Autentisk, farverigt og næsten ingen turister.</li>
+            <li>Smag anchovy-pasta til frokost – det er her det spises friskest.</li>
+            <li>Videre til Minori: lille by med fin strand og den beskedne men charmerende basilika.</li>
+            <li>Vend hjem langs kysten om eftermiddagen.</li>
+          </ul>
+        </div>
+        <div class="opt opt-b">
+          <div class="opt-label">&#9679; Mulighed B – Sorrento dagsudflugt</div>
+          <strong>Sorrento – den klassiske kystby</strong>
+          <ul>
+            <li>Færge fra Amalfi havn til Sorrento (ca. 45 min, ~€13 p.p.) eller SITA-bus.</li>
+            <li>Gå i Sorrentos smukke gader: Corso Italia og sidegaderne er hyggelige og børnevenlige.</li>
+            <li>Limoncello-smagning og citronprodukter er Sorrentos specialitet.</li>
+            <li>Marina Piccola: tag elevatoren ned til havnen og nyd udsigten mod Vesuvius.</li>
+            <li>Lidt touristet men et dejligt og velafrundt sted.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Eftermiddag</div>
+        <div class="time-content"><strong>Amalfi Domkirken + Museo della Carta</strong>
+          <p>Brug eftermiddagen i Amalfi: <strong>Duomo di Sant'Andrea</strong> er imponerende (entré ca. €3). <strong>Museo della Carta</strong> (papirmuseet, entré ca. €4) viser de gamle møller i drift – et hit med nysgerrige børn. Museet ligger i en grotte-agtig dal – spændende sceneri.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Aften</div>
+        <div class="time-content"><strong>Afskedsmiddag &#127839;</strong>
+          <p>Afslut rejsen med en god middag i Amalfi. Find en restaurant i en sidegade med evt. udsigt. Prøv <em>scialatielli ai frutti di mare</em> – den lokale pasta med frisk skaldyr.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 12 fly home -->
+  <div class="day-card" id="am-day12">
+    <div class="day-header" onclick="toggleDay('am-day12')">
+      <div class="day-num travel-bg">12</div>
+      <div class="day-title"><h3>Torsdag 14. maj – Hjemrejse</h3><small>Fly NAP &#8594; BLL kl. 15:50 · Afrejse fra hotellet kl. 07:00!</small></div>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="day-body">
+      <div class="time-block">
+        <div class="time-label">07:00</div>
+        <div class="time-content"><strong>Afrejse fra Amalfi – tidligst muligt</strong>
+          <p>Fly 15:50 fra NAP. Check-in lukker senest kl. 13:50. Rejsetid Amalfi → Napoli lufthavn: <strong>2–2,5 timer i bil</strong>. Planlæg at ankomme til lufthavnen senest kl. 13:15 = afrejse fra hotellet senest kl. 07:00. Aflever lejebil og tjek ind i god tid.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">Formiddag</div>
+        <div class="time-content"><strong>Ankomst Napoli Capodichino (NAP)</strong>
+          <p>Aflever lejebil (tjek brændstofstand!). Check ind, sæt jer til rette og nyd den allersidste italienske espresso.</p></div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">15:50</div>
+        <div class="time-content"><strong>Afgang Napoli &#8594; Billund · God tur hjem!</strong>
+          <p>Ankomst Billund ~19:00 (ca.). Medbragt limoncello, colatura di alici og souvenirs fra San Gregorio Armeno.</p></div>
+      </div>
+      <div class="warning-box">
+        <strong>&#9888;&#65039; VIGTIGT: Amalfi &#8594; Lufthavn</strong>
+        2,5 timer er minimumsestimatet uden forsinkelser. Amalfikystvejens morgenrush og den sydlige motorvej A3 kan tilsammen trække det ud. Sæt afsted kl. 07:00. Overvej om I aftenen den 13. maj skal køre til et hotel tæt på Napoli for en nemmere morgen.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ INFO ══════════════════════ -->
+<section id="info" class="section">
+  <div class="phase-heading info-border">
+    <h2>Praktisk Information</h2>
+    <p>Hoteller · Billetter · Sikkerhed · Transport · Tips</p>
+  </div>
+
+  <h3 style="margin-bottom:.7rem; font-size:1rem;">&#127968; Hoteller</h3>
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>&#127987;&#65039; Napoli (3–8 maj)</h4>
+      <p><strong>Splendido Loft nel Cuore Antico</strong><br/>Via Pasquale Scura 37, 80133 Napoli<br/>Historisk center – 10 min til Molo Beverello (færgehavn).</p>
+    </div>
+    <div class="info-card">
+      <h4>&#127807; Agriturismo (8–10 maj)</h4>
+      <p><strong>Azienda Agrituristica Vivi Natura</strong><br/>Bekræft adresse direkte med hotellet.<br/>Tæt på Pompeii og Vesuvius.</p>
+    </div>
+    <div class="info-card">
+      <h4>&#9981;&#65039; Amalfi (10–14 maj)</h4>
+      <p><strong>Hotel La Pergola</strong><br/>G. Augustariccio 14, Amalfi<br/>4 nætter. Tæt på havn og domkirken.</p>
+    </div>
+  </div>
+
+  <h3 style="margin:1.5rem 0 .7rem; font-size:1rem;">&#127915; Bookede billetter</h3>
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>&#128652; Hop-on Hop-off Bus · 5. maj</h4>
+      <ul>
+        <li>24-timers billet · GetYourGuide-appen</li>
+        <li>Start: Parco Castello, Piazza Municipio</li>
+        <li>Linje A (rød): 45 min, afgang kl. 9:30</li>
+        <li>Linje B (blå): 70 min, afgang kl. 9:45</li>
+        <li>Pris: 583 DKK (2 voksne, 2 børn, 1 spædbarn)</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>&#128300; Città della Scienza · 6. maj</h4>
+      <ul>
+        <li><strong>Ombyt kuponer i billetkontoret!</strong></li>
+        <li>Via Coroglio, 57/104, 80124 Napoli</li>
+        <li>Cafeteria og videnskabsbutik på stedet</li>
+        <li>Pris: 329 DKK (2 voksne, 3 børn)</li>
+        <li>Transport: Bus 606 eller taxa (~€12)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin:1.5rem 0 .7rem; font-size:1rem;">&#9888;&#65039; Sikkerhed i Napoli</h3>
+  <div class="info-card" style="margin-bottom:1rem;">
+    <h4>Trygge kvarterer om aftenen</h4>
+    <ul>
+      <li><strong>Centro Storico</strong> – Jeres hotelkvarter. Levende og generelt trygt.</li>
+      <li><strong>Chiaia</strong> – Det fine kvarter langs havet. Sikkert og godt for aftensmad.</li>
+      <li><strong>Mergellina</strong> – Hyggelig havnepromenade, god om aftenen.</li>
+      <li><strong>Via Toledo</strong> – Gågaden. Befærdet og tryg hele dagen.</li>
+    </ul>
+    <br/>
+    <h4>Undgå om aftenen</h4>
+    <ul>
+      <li><strong>Piazza Garibaldi / Napoli Centrale</strong> – Gå direkte, undgå at linge.</li>
+      <li><strong>Quartieri Spagnoli om natten</strong> – Spændende gader om dagen, undgå om natten.</li>
+    </ul>
+    <br/>
+    <h4>Generelle tips</h4>
+    <ul>
+      <li>Bær tasker foran på maven i menneskemasser</li>
+      <li>Brug taxa med taxameter – aldrig uofficielle taxaer</li>
+      <li>Vær opmærksom på knallerter i gangzoner</li>
+    </ul>
+  </div>
+
+  <h3 style="margin:1.5rem 0 .7rem; font-size:1rem;">&#128683; Turistfælder – undgå disse</h3>
+  <div class="info-card" style="margin-bottom:1rem;">
+    <ul>
+      <li><strong>Restauranter ved Piazza del Plebiscito og Piazza Municipio</strong> – turistpriser.</li>
+      <li><strong>"Menu Turistico"-skilte</strong> – du betaler for at være turist, ikke for maden.</li>
+      <li><strong>Uofficielle guides ved Pompeii</strong> – kun licenserede guides er troværdige.</li>
+      <li><strong>Taxi uden taxameter</strong> – aftal altid pris på forhånd.</li>
+      <li><strong>Restauranter direkte ved Amalfi-domkirken</strong> – gå ad sidegaderne.</li>
+      <li><strong>Limoncello fra souvenirishops</strong> – køb i supermarked eller rigtig liquor-butik.</li>
+    </ul>
+  </div>
+
+  <h3 style="margin:1.5rem 0 .7rem; font-size:1rem;">&#127860; Mad I skal prøve</h3>
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>&#127829; Napoli-klassikere</h4>
+      <ul>
+        <li>Pizza Margherita (ægte neapolitansk)</li>
+        <li>Sfogliatella (bagt blæredejsgebak)</li>
+        <li>Babà al rum (romkage)</li>
+        <li>Fritto misto di mare (friteret seafood)</li>
+        <li>Granita di limone</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>&#127757; Amalfikyst-specialiteter</h4>
+      <ul>
+        <li>Scialatielli ai frutti di mare (lokal pasta)</li>
+        <li>Colatura di alici (Cetaras fiskesauce)</li>
+        <li>Delizia al limone (citronkage fra Sorrento)</li>
+        <li>Alici fritte (friterede ansjoser)</li>
+        <li>Limoncello sfusato amalfitano</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin:1.5rem 0 .7rem; font-size:1rem;">&#128652; Vigtig transport-info</h3>
+  <div class="info-card">
+    <ul>
+      <li><strong>Lufthavn → Napoli centrum:</strong> Taxi (ca. €20–25, insistér på meter) eller Alibus</li>
+      <li><strong>Molo Beverello (færgehavn):</strong> 10 min gang fra hotel 1. Ischia, Capri, Sorrento</li>
+      <li><strong>Circumvesuviana-toget:</strong> Napoli Centrale → Pompeii Scavi, 35 min, ~€3 p.p.</li>
+      <li><strong>SITA-bus:</strong> Amalfi ↔ Sorrento ↔ Positano ↔ Praiano, ca. €2,50/tur</li>
+      <li><strong>Hurtigbåde:</strong> Forbinder alle kystbyer om sommeren, ca. €10–15/tur</li>
+      <li><strong>Amalfi → NAP lufthavn:</strong> Mindst 2,5 timer i bil. Afrejse <u>senest kl. 07:00</u> den 14. maj!</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  Udkast til rejseplan · Napoli, Pompeii &amp; Amalfikysten · 3–14. maj 2026<br/>
+  Husk: Planen er et forslag – vær impulsive og nyd rejsen!
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── Tab navigation ──────────────────────────────────────────────────────────
+const tabClasses = { napoli:'active-napoli', agri:'active-agri', amalfi:'active-amalfi', info:'active-info' };
+
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.className = 'tab-btn');
+  document.getElementById(id).classList.add('active');
+  btn.classList.add(tabClasses[id]);
+  if (mapInitialized) flyToPhase(id);
+}
+document.querySelector('.tab-btn').classList.add('active-napoli');
+
+// ── Day accordion ───────────────────────────────────────────────────────────
+function toggleDay(id) { document.getElementById(id).classList.toggle('open'); }
+function expandAll(phase)  { document.getElementById(phase).querySelectorAll('.day-card').forEach(c => c.classList.add('open')); }
+function collapseAll(phase){ document.getElementById(phase).querySelectorAll('.day-card').forEach(c => c.classList.remove('open')); }
+
+// ── Map ─────────────────────────────────────────────────────────────────────
+let map, mapInitialized = false;
+
+function toggleMap() {
+  const panel = document.getElementById('map-panel');
+  panel.classList.toggle('map-open');
+  document.querySelector('#map-toggle span:first-child').textContent =
+    panel.classList.contains('map-open') ? '🗺️ Skjul kort' : '🗺️ Vis kort';
+  if (!mapInitialized && panel.classList.contains('map-open')) initMap();
+  else if (mapInitialized) setTimeout(() => map.invalidateSize(), 50);
+}
+
+const phases = {
+  napoli: { center: [40.855, 14.17], zoom: 11 },
+  agri:   { center: [40.73,  14.47], zoom: 11 },
+  amalfi: { center: [40.636, 14.58], zoom: 12 },
+  info:   { center: [40.72,  14.42], zoom: 10 }
+};
+
+const places = [
+  // Hoteller
+  { name: 'Hotel 1: Napoli\nVia Pasquale Scura 37', ll: [40.8479, 14.2575], color: '#f39c12', phase: 'napoli', icon: '🏨' },
+  { name: 'Hotel 2: Agriturismo\nVivi Natura (ca.)',  ll: [40.655,  14.455],  color: '#f39c12', phase: 'agri',   icon: '🏡' },
+  { name: 'Hotel 3: Amalfi\nLa Pergola',             ll: [40.6341, 14.6027], color: '#f39c12', phase: 'amalfi', icon: '🏨' },
+  // Napoli-fase
+  { name: 'Molo Beverello\n(Færgehavn)',         ll: [40.8400, 14.2579], color: '#c0392b', phase: 'napoli', icon: '⛴️' },
+  { name: 'Città della Scienza',                 ll: [40.8064, 14.1847], color: '#c0392b', phase: 'napoli', icon: '🔬' },
+  { name: 'Castel dell\'Ovo',                    ll: [40.8300, 14.2479], color: '#c0392b', phase: 'napoli', icon: '🏰' },
+  { name: 'Piazza del Plebiscito',               ll: [40.8356, 14.2490], color: '#c0392b', phase: 'napoli', icon: '🏛️' },
+  // Dagsture fra Napoli
+  { name: 'Ischia Porto',    ll: [40.7333, 13.9000], color: '#8e44ad', phase: 'napoli', icon: '🏝️' },
+  { name: 'Castel Aragonese\n(Ischia)', ll: [40.7247, 13.9495], color: '#8e44ad', phase: 'napoli', icon: '⚔️' },
+  // Agriturismo-fase
+  { name: 'Pompeii',     ll: [40.7503, 14.4869], color: '#27ae60', phase: 'agri', icon: '🏛️' },
+  { name: 'Vesuvius',    ll: [40.8214, 14.4260], color: '#27ae60', phase: 'agri', icon: '🌋' },
+  { name: 'Herculaneum', ll: [40.8062, 14.3478], color: '#27ae60', phase: 'agri', icon: '🏺' },
+  { name: 'Sorrento',    ll: [40.6265, 14.3767], color: '#27ae60', phase: 'agri', icon: '🍋' },
+  // Amalfi-fase
+  { name: 'Positano',   ll: [40.6281, 14.4843], color: '#2980b9', phase: 'amalfi', icon: '📸' },
+  { name: 'Praiano',    ll: [40.6122, 14.5404], color: '#2980b9', phase: 'amalfi', icon: '⚓' },
+  { name: 'Ravello',    ll: [40.6496, 14.6107], color: '#2980b9', phase: 'amalfi', icon: '🌺' },
+  { name: 'Atrani',     ll: [40.6349, 14.6117], color: '#2980b9', phase: 'amalfi', icon: '🐟' },
+  { name: 'Cetara',     ll: [40.6490, 14.7022], color: '#2980b9', phase: 'amalfi', icon: '🐟' },
+  { name: 'Minori',     ll: [40.6438, 14.6360], color: '#2980b9', phase: 'amalfi', icon: '🏖️' },
+  { name: 'Sorrento\n(dagsudflugt)', ll: [40.6265, 14.3767], color: '#2980b9', phase: 'amalfi', icon: '🍋' },
+];
+
+let markers = [];
+let currentPhase = 'napoli';
+
+function initMap() {
+  map = L.map('map', { zoomControl: true }).setView(phases.napoli.center, phases.napoli.zoom);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18
+  }).addTo(map);
+
+  places.forEach(p => {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="
+        background:${p.color};
+        color:#fff;
+        border-radius:50%;
+        width:32px;height:32px;
+        display:flex;align-items:center;justify-content:center;
+        font-size:14px;
+        border:2px solid rgba(255,255,255,.8);
+        box-shadow:0 2px 6px rgba(0,0,0,.35);
+        cursor:pointer;
+      ">${p.icon}</div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+      popupAnchor: [0, -18]
+    });
+    const m = L.marker(p.ll, { icon })
+      .bindPopup(`<strong>${p.name.replace('\n','<br>')}</strong>`, { maxWidth: 160 })
+      .addTo(map);
+    m._phase = p.phase;
+    m._hotelPhase = p.color === '#f39c12';
+    markers.push(m);
+  });
+
+  mapInitialized = true;
+  updateMarkerVisibility('napoli');
+}
+
+function flyToPhase(phase) {
+  currentPhase = phase;
+  const v = phases[phase] || phases.info;
+  map.flyTo(v.center, v.zoom, { duration: 1.2 });
+  updateMarkerVisibility(phase);
+}
+
+function updateMarkerVisibility(phase) {
+  markers.forEach(m => {
+    const visible = m._phase === phase || m._hotelPhase;
+    if (visible) { if (!map.hasLayer(m)) map.addLayer(m); }
+    else         { if (map.hasLayer(m)) map.removeLayer(m); }
+  });
+}
+</script>
+</body>
+</html>
