@@ -132,6 +132,35 @@
     .ctrl-btn { padding:.3rem .8rem; border-radius:6px; border:1px solid #d5c9bc; background:#fff; cursor:pointer; font-size:.82rem; color:var(--muted); }
     .ctrl-btn:hover { background:#f0ebe4; }
 
+    /* ── Ticket boxes ── */
+    .ticket-section { margin-bottom:1.5rem; }
+    .ticket-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:.85rem; margin-top:.75rem; }
+    .ticket-card { background:#fff; border-radius:12px; box-shadow:var(--shadow); padding:1rem 1.1rem; border-left:5px solid; }
+    .ticket-card.urgent  { border-color:#e74c3c; }
+    .ticket-card.soon    { border-color:#f39c12; }
+    .ticket-card.relaxed { border-color:#27ae60; }
+    .urgency-tag { display:inline-block; font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:.2rem .55rem; border-radius:4px; margin-bottom:.45rem; }
+    .urgent  .urgency-tag { background:#fdedec; color:#c0392b; }
+    .soon    .urgency-tag { background:#fef9e7; color:#d68910; }
+    .relaxed .urgency-tag { background:#e9f7ef; color:#1e8449; }
+    .ticket-card h4 { font-size:.95rem; margin-bottom:.25rem; }
+    .ticket-card .price { font-size:.83rem; color:#555; margin-bottom:.5rem; line-height:1.5; }
+    .ticket-card .price strong { color:var(--dark); }
+    .ticket-card .buy-btn { display:inline-block; padding:.35rem .85rem; border-radius:6px; font-size:.82rem; font-weight:700; text-decoration:none; transition:opacity .15s; }
+    .urgent  .buy-btn { background:#e74c3c; color:#fff; }
+    .soon    .buy-btn { background:#f39c12; color:#fff; }
+    .relaxed .buy-btn { background:#27ae60; color:#fff; }
+    .ticket-card .buy-btn:hover { opacity:.85; }
+    .ticket-card .note { font-size:.78rem; color:var(--muted); margin-top:.4rem; }
+
+    /* ── Inline ticket link in day cards ── */
+    .day-ticket { display:flex; align-items:center; gap:.6rem; background:#fafafa; border:1px solid #e8ddd0; border-radius:8px; padding:.5rem .8rem; margin-top:.75rem; font-size:.83rem; }
+    .day-ticket a { font-weight:700; text-decoration:none; white-space:nowrap; }
+    .day-ticket a.urgent-link  { color:#c0392b; }
+    .day-ticket a.soon-link    { color:#d68910; }
+    .day-ticket a.relaxed-link { color:#1e8449; }
+    .day-ticket a:hover { text-decoration:underline; }
+
     footer { text-align:center; padding:2rem 1rem; color:var(--muted); font-size:.82rem; }
 
     @media(max-width:600px){
@@ -348,7 +377,8 @@
       <div class="time-block">
         <div class="time-label">08:30</div>
         <div class="time-content"><strong>Færge fra Molo Beverello <span class="badge badge-tip">Tæt på hotellet!</span></strong>
-          <p>Molo Beverello er kun 10 minutters gang fra Via Pasquale Scura. Hurtigfærge (aliscafo) til Ischia Porto tager 45–55 min. Rederier: Caremar, Medmar, SNAV. Billetter online eller ved kassen. Pris ca. €15–20/voksen, børn billigere. Tag tidlig afgang for at få mest ud af dagen.</p></div>
+          <p>Molo Beverello er kun 10 minutters gang fra Via Pasquale Scura. Hurtigfærge (aliscafo) til Ischia Porto tager 45–55 min. Caremar er billigst (€20,40/voksen, halvpris børn 4–12 år, under 4 gratis). Tag en tidlig afgang for at få mest ud af dagen.</p>
+          <div class="day-ticket">&#127915; <a class="soon-link" href="https://shop.caremar.it/en/rates/" target="_blank" rel="noopener">Bestil Caremar-færgebilletter her →</a> &nbsp;|&nbsp; Sammenlign alle rederier på <a class="soon-link" href="https://www.ferryhopper.com/en/ferry-routes/direct/ferry-naples-ischia-traghetti" target="_blank" rel="noopener">Ferryhopper.com →</a></div></div>
       </div>
       <div class="time-block">
         <div class="time-label">Formiddag</div>
@@ -402,7 +432,8 @@
         <div class="opt opt-b">
           <div class="opt-label">&#9679; Mulighed B – Herculaneum på vejen</div>
           <strong>Stop ved Herculaneum (Ercolano)</strong>
-          <p>Mindre og bedre bevaret end Pompeii – 2 timer er nok. Lettere med børn end det store Pompeii-kompleks. Ligger direkte på vejen sydover (motorvej A3). Entré ca. €13/voksen.</p>
+          <p>Mindre og bedre bevaret end Pompeii – 2 timer er nok. Lettere med børn end det store Pompeii-kompleks. Ligger direkte på vejen sydover (motorvej A3). €16/voksen, børn under 18 gratis (EU).</p>
+          <div class="day-ticket">&#127915; <a class="soon-link" href="https://ercolano.cultura.gov.it/tickets/?lang=en" target="_blank" rel="noopener">Køb billetter til Herculaneum – CoopCulture →</a></div>
         </div>
       </div>
       <div class="time-block">
@@ -440,7 +471,8 @@
       <div class="time-block">
         <div class="time-label">Morgen</div>
         <div class="time-content"><strong>Tidlig start – ankomst ved Pompeii kl. 8:30</strong>
-          <p>Pompeii er et kæmpe areal (66 hektar), og I bor bogstaveligt talt lige ved siden af. <em>Det er afgørende at komme tidligt</em> – om formiddagen er der langt færre turister og en mere behagelig temperatur. Køb billetter online på forhånd (officielt site: pompeiisite.org) for at undgå kø. Tag rigeligt med vand og snacks – der er begrænset mad inden for selve ruinerne.</p></div>
+          <p>Pompeii er et kæmpe areal (66 hektar), og I bor bogstaveligt talt lige ved siden af. <em>Det er afgørende at komme tidligt</em> – om formiddagen er der langt færre turister og en mere behagelig temperatur. Timed entry er obligatorisk – max 20.000 besøgende pr. dag. Tag rigeligt med vand og snacks – der er begrænset mad inden for selve ruinerne.</p>
+          <div class="day-ticket">&#128308; <strong>Book straks!</strong> &nbsp;<a class="urgent-link" href="https://www.vivaticket.com/it/tour/parco-archeologico-di-pompei/2316" target="_blank" rel="noopener">Køb Pompeii-billetter på Vivaticket →</a> &nbsp;|&nbsp; €20/voksen · Børn under 18 gratis (EU)</div></div>
       </div>
       <div class="options">
         <div class="opt opt-a">
@@ -461,9 +493,10 @@
             <li>Pompeii kl. 8:30–12:00 (kompakt rute: Forum, Huset af Faun, Amphitheater)</li>
             <li>Kør op til Vesuvius kl. 13:00 (ca. 25 min kørsel)</li>
             <li>Parkér ved P-plads, gå 30 min op til kraterkanten (700 m sti)</li>
-            <li>Entré Vesuvius: ca. €10/person · Udsigten er uovertruffen</li>
+            <li>Entré Vesuvius: €10/voksen · 6–25 år €8 · Under 6 gratis · Guide inkluderet</li>
             <li>NB: Stien er stejl og gruset – den 3-årige skal bæres eller sidde i bæresele</li>
           </ul>
+          <div class="day-ticket">&#128308; <strong>Book straks!</strong> &nbsp;<a class="urgent-link" href="https://www.parconazionaledelvesuvio.it/en/visit-the-park/the-paths/the-great-cono-2-2/" target="_blank" rel="noopener">Køb Vesuvius-billetter – Nationalparken →</a> &nbsp;|&nbsp; Online booking er obligatorisk</div>
         </div>
       </div>
       <div class="time-block">
@@ -621,7 +654,8 @@
       <div class="time-block">
         <div class="time-label">Morgen</div>
         <div class="time-content"><strong>Transport til Positano</strong>
-          <p>Hurtigbåd fra Amalfi havn (30 min, ca. €10–12 p.p.) – anbefalet, fantastisk udsigt fra havet. Alternativt: SITA-bus (45 min, ca. €2,50 p.p.). Med bil: parkér i toppen og gå ned – P-pladser er dyre og svære at finde.</p></div>
+          <p>Hurtigbåd fra Amalfi havn (30 min, ca. €9–10/person, halvpris børn 4–12 år) – anbefalet frem for bus, og udsigten fra havet er fantastisk. Alternativt: SITA-bus (45 min, ca. €2,50/person). Med bil: parkér i toppen og gå ned – P-pladser er dyre og svære at finde.</p>
+          <div class="day-ticket">&#127915; <a class="relaxed-link" href="https://www.ferryhopper.com/en/ferries/italy/amalfi" target="_blank" rel="noopener">Se færgetider og priser – Ferryhopper →</a> &nbsp;|&nbsp; Kan som regel købes på kajen i tidlig maj</div></div>
       </div>
       <div class="time-block">
         <div class="time-label">Formiddag</div>
@@ -671,7 +705,7 @@
           <div class="opt-label">&#9679; Mulighed B – Sorrento dagsudflugt</div>
           <strong>Sorrento – den klassiske kystby</strong>
           <ul>
-            <li>Færge fra Amalfi havn til Sorrento (ca. 45 min, ~€13 p.p.) eller SITA-bus.</li>
+            <li>Færge fra Amalfi havn til Sorrento (ca. 45–90 min, €18–24/voksen, halvpris børn 4–12 år) eller SITA-bus. <a href="https://www.ferryhopper.com/en/ferries/italy/amalfi" target="_blank" rel="noopener" style="color:#d68910;font-weight:700;">Se tider på Ferryhopper →</a></li>
             <li>Gå i Sorrentos smukke gader: Corso Italia og sidegaderne er hyggelige og børnevenlige.</li>
             <li>Limoncello-smagning og citronprodukter er Sorrentos specialitet.</li>
             <li>Marina Piccola: tag elevatoren ned til havnen og nyd udsigten mod Vesuvius.</li>
@@ -729,6 +763,105 @@
     <h2>Praktisk Information</h2>
     <p>Hoteller · Billetter · Sikkerhed · Transport · Tips</p>
   </div>
+
+  <!-- BILLETSEKTION -->
+  <div class="ticket-section">
+    <h3 style="font-size:1rem; margin-bottom:.4rem;">&#127915; Billetter – hvad I bør købe nu</h3>
+    <p style="font-size:.85rem; color:var(--muted); margin-bottom:.75rem;">Rød = bestil straks · Gul = bestil inden afrejse · Grøn = kan købes på dagen</p>
+
+    <div class="ticket-grid">
+
+      <div class="ticket-card urgent">
+        <span class="urgency-tag">&#128308; Bestil straks</span>
+        <h4>Pompeii – Parco Archeologico</h4>
+        <div class="price">
+          <strong>€20 / voksen</strong> · Børn under 18 år: <strong>gratis</strong> (EU-statsborgere)<br/>
+          Familie (2 voksne + 3 børn): <strong>ca. €40 i alt</strong><br/>
+          Tvangsvist timed entry – max 20.000 besøgende pr. dag. Slots sælger ud uger i forvejen i maj.
+        </div>
+        <a class="buy-btn" href="https://www.vivaticket.com/it/tour/parco-archeologico-di-pompei/2316" target="_blank" rel="noopener">Køb billetter på Vivaticket →</a>
+        <div class="note">Officiel billetsalgspartner for Pompei fra marts 2026. Billetter er personlige – navne kræves ved køb.</div>
+      </div>
+
+      <div class="ticket-card urgent">
+        <span class="urgency-tag">&#128308; Bestil straks</span>
+        <h4>Vesuvius – Gran Cono kratervandring</h4>
+        <div class="price">
+          <strong>€10 / voksen</strong> · Under 6 år: <strong>gratis</strong> · 6–25 år: <strong>€8</strong><br/>
+          Familie (2 voksne + 2 børn over 6 + 1 under 6): <strong>ca. €36 i alt</strong><br/>
+          Online booking er <em>obligatorisk</em> – der sælges ikke billetter ved indgangen. Guide er inkluderet i prisen.
+        </div>
+        <a class="buy-btn" href="https://www.parconazionaledelvesuvio.it/en/visit-the-park/the-paths/the-great-cono-2-2/" target="_blank" rel="noopener">Køb billetter – Vesuvius Nationalpark →</a>
+        <div class="note">Slips frigives 30 dage i forvejen. 20 % af pladserne reserveres til lastminute-køb 1 time før.</div>
+      </div>
+
+      <div class="ticket-card soon">
+        <span class="urgency-tag">&#128993; Bestil inden afrejse</span>
+        <h4>Færge Napoli ↔ Ischia</h4>
+        <div class="price">
+          <strong>€20,40 / voksen</strong> (hurtigfærge fra Molo Beverello) · Børn 4–12 år: ca. <strong>halvpris</strong> · Under 4 år: <strong>gratis</strong><br/>
+          Familie tur-retur: <strong>ca. €100–120</strong><br/>
+          Caremar er billigst og afgår fra jeres nærliggende Molo Beverello. Tidlig maj er travl – book 3–4 uger i forvejen.
+        </div>
+        <a class="buy-btn" href="https://shop.caremar.it/en/rates/" target="_blank" rel="noopener">Køb billetter – Caremar →</a>
+        <div class="note">Alternativt kan alle operatører sammenlignes på <a href="https://www.ferryhopper.com/en/ferry-routes/direct/ferry-naples-ischia-traghetti" target="_blank" rel="noopener">Ferryhopper.com</a>. Vælg Molo Beverello som afgangssted.</div>
+      </div>
+
+      <div class="ticket-card soon">
+        <span class="urgency-tag">&#128993; Anbefalet på forhånd</span>
+        <h4>Herculaneum – Parco Archeologico</h4>
+        <div class="price">
+          <strong>€16 / voksen</strong> · Børn under 18 år: <strong>gratis</strong> (EU) · 18–25 år: <strong>€2</strong><br/>
+          Familie (2 voksne): <strong>€32 i alt</strong><br/>
+          Kun relevant hvis I vælger stop ved Herculaneum på vejen (dag 6). Gratis første søndag i måneden – 3. maj er en søndag, men da er I stadig i Napoli.
+        </div>
+        <a class="buy-btn" href="https://ercolano.cultura.gov.it/tickets/?lang=en" target="_blank" rel="noopener">Køb billetter – CoopCulture →</a>
+        <div class="note">Slots frigives 3–4 måneder i forvejen. Mindre og langt roligere end Pompeii – oplagt med børn.</div>
+      </div>
+
+      <div class="ticket-card relaxed">
+        <span class="urgency-tag">&#128994; Kan købes på dagen</span>
+        <h4>Castel Aragonese, Ischia</h4>
+        <div class="price">
+          <strong>€15 / voksen</strong> · 10–18 år: <strong>€6</strong> · Under 10 år: <strong>gratis</strong><br/>
+          Familie (2 voksne + 1 barn 10 år + 1 barn 7 år + 1 under 10): <strong>€42 i alt</strong><br/>
+          Sælges ved porten. Sjældent udsolgt.
+        </div>
+        <a class="buy-btn" href="https://www.castelloaragoneseischia.com/en/plan-your-visit" target="_blank" rel="noopener">Se info – Castel Aragonese →</a>
+        <div class="note">Elevator/gangbro til borgen er inkluderet. Åbent dagligt kl. 9 til solnedgang.</div>
+      </div>
+
+      <div class="ticket-card relaxed">
+        <span class="urgency-tag">&#128994; Kan købes på dagen</span>
+        <h4>Villa Rufolo + Villa Cimbrone, Ravello</h4>
+        <div class="price">
+          <strong>Rufolo: €7 / voksen</strong> · Under 12 år: <strong>€5</strong><br/>
+          <strong>Cimbrone: €10 / voksen</strong> · Børn: reduceret pris<br/>
+          Ingen forudbooking nødvendig – betales ved indgangen.
+        </div>
+        <a class="buy-btn" href="https://www.villarufolo.it" target="_blank" rel="noopener">Villa Rufolo →</a>
+        &nbsp;
+        <a class="buy-btn" href="https://www.hotelvillacimbrone.com/villa-cimbrone-gardens-2/" target="_blank" rel="noopener">Villa Cimbrone →</a>
+        <div class="note">Begge villas er en kort gåtur fra Ravello's centrale plads.</div>
+      </div>
+
+      <div class="ticket-card relaxed">
+        <span class="urgency-tag">&#128994; Kan købes på dagen</span>
+        <h4>Færger på Amalfikysten</h4>
+        <div class="price">
+          Amalfi ↔ Positano: <strong>€9–10 / person</strong> · Halvpris for børn 4–12 år<br/>
+          Amalfi ↔ Sorrento: <strong>€18–24 / person</strong> · Halvpris for børn 4–12 år<br/>
+          I tidlig maj er det sjældent nødvendigt at booke frem – men tjek aktuel tidsplan.
+        </div>
+        <a class="buy-btn" href="https://www.travelmar.it/en/index" target="_blank" rel="noopener">Travelmar (Positano) →</a>
+        &nbsp;
+        <a class="buy-btn" href="https://www.ferryhopper.com/en/ferries/italy/amalfi" target="_blank" rel="noopener">Ferryhopper (alle ruter) →</a>
+        <div class="note">NLG sejler Amalfi–Sorrento. Sammenlign alle ruter på Ferryhopper.</div>
+      </div>
+
+    </div>
+  </div>
+  <!-- SLUT BILLETSEKTION -->
 
   <h3 style="margin-bottom:.7rem; font-size:1rem;">&#127968; Hoteller</h3>
   <div class="info-grid">
