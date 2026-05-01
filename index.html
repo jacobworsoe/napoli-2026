@@ -11,6 +11,7 @@
       --agri:    #27ae60;
       --amalfi:  #2980b9;
       --gold:    #f39c12;
+      --pakke:   #8e44ad;
       --cream:   #fdf6ec;
       --dark:    #2c2c2c;
       --muted:   #7f8c8d;
@@ -34,6 +35,7 @@
     .tab-btn.active-agri    { background:var(--agri);   color:#fff; }
     .tab-btn.active-amalfi  { background:var(--amalfi); color:#fff; }
     .tab-btn.active-info    { background:var(--gold);   color:#fff; }
+    .tab-btn.active-pakke  { background:var(--pakke);  color:#fff; }
 
     /* ── Sections ── */
     .section { display:none; padding:1.5rem; max-width:880px; margin:0 auto; }
@@ -47,6 +49,7 @@
     .agri-border   { border-color:var(--agri);   }
     .amalfi-border { border-color:var(--amalfi); }
     .info-border   { border-color:var(--gold);   }
+    .pakke-border  { border-color:var(--pakke);  }
 
     /* ── Day card ── */
     .day-card { background:#fff; border-radius:12px; box-shadow:var(--shadow); margin-bottom:1rem; overflow:hidden; }
@@ -163,6 +166,20 @@
     a.badge-inplan { text-decoration:none; cursor:pointer; }
     a.badge-inplan:hover { opacity:.8; }
 
+    /* ── Pakkeliste ── */
+    .pakke-progress-label { font-size:.82rem; color:var(--muted); margin-bottom:.4rem; display:flex; justify-content:space-between; align-items:center; }
+    .pakke-progress-wrap { background:#f0f0f0; border-radius:8px; margin-bottom:1.4rem; overflow:hidden; }
+    .pakke-progress-bar { background:var(--pakke); height:10px; border-radius:8px; transition:width .3s; width:0%; }
+    .pakke-reset { font-size:.8rem; color:var(--muted); background:none; border:1px solid #ddd; border-radius:20px; padding:.25rem .8rem; cursor:pointer; }
+    .pakke-reset:hover { border-color:var(--pakke); color:var(--pakke); }
+    .pakke-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:1rem; }
+    .pakke-card { background:#fff; border-radius:10px; padding:1.1rem 1.2rem; box-shadow:var(--shadow); }
+    .pakke-card h4 { font-size:.95rem; color:var(--dark); margin-bottom:.65rem; display:flex; align-items:center; gap:.45rem; }
+    .pakke-item { display:flex; align-items:flex-start; gap:.55rem; padding:.28rem 0; cursor:pointer; }
+    .pakke-item input[type=checkbox] { margin-top:3px; accent-color:var(--pakke); cursor:pointer; flex-shrink:0; }
+    .pakke-item span { font-size:.87rem; line-height:1.4; }
+    .pakke-item.done span { text-decoration:line-through; color:var(--muted); }
+
     footer { text-align:center; padding:2rem 1rem; color:var(--muted); font-size:.82rem; }
 
     @media(max-width:600px){
@@ -191,6 +208,7 @@
   <button class="tab-btn" onclick="showTab('agri',this)">&#127807; Agriturismo (8–10 maj)</button>
   <button class="tab-btn" onclick="showTab('amalfi',this)">&#9981;&#65039; Amalfi (10–14 maj)</button>
   <button class="tab-btn" onclick="showTab('info',this)">&#128203; Praktisk info</button>
+  <button class="tab-btn" onclick="showTab('pakkeliste',this)">&#129523; Pakkeliste</button>
 </nav>
 
 <!-- ══════════════════════════════════════════ NAPOLI ══════════════════════ -->
@@ -206,17 +224,15 @@
       <li>
         <div class="top5-num napoli-bg">1</div>
         <div class="top5-content">
-          <strong>Museo Archeologico Nazionale (MANN) <span class="badge badge-notplan">Ikke planlagt</span></strong>
-          <p>Et af verdens vigtigste klassiske museer — her er skattefundene fra Pompeji og Herculaneum. Se det FØR Pompeji for at forstå, hvad I ser i ruinerne. Ca. 2 timer og børnevenligt.</p>
-          <p class="top5-note">⚠️ Ikke sat på nogen dag endnu — passer bedst ind på dag 4 (halvdag) eller som alternativ til Città della Scienza</p>
+          <strong>Museo Archeologico Nazionale (MANN) <a class="badge badge-inplan" href="javascript:void(0)" onclick="goToDay('n-day5')">✓ Dag 5</a></strong>
+          <p>Et af verdens vigtigste klassiske museer — skattefundene fra Pompeji og Herculaneum. Perfekt at besøge dagen inden Pompeji-turen, så I ved hvad I ser i ruinerne. Ca. 2 timer og børnevenligt.</p>
         </div>
       </li>
       <li>
         <div class="top5-num napoli-bg">2</div>
         <div class="top5-content">
-          <strong>Napoli Sotterranea <span class="badge badge-gem">Skjult perle</span></strong>
+          <strong>Napoli Sotterranea <span class="badge badge-gem">Skjult perle</span> <a class="badge badge-inplan" href="javascript:void(0)" onclick="goToDay('n-day5')">↗ Mulighed A, Dag 5</a></strong>
           <p>40 km tunneller under gaderne fra græsk tid til 2. verdenskrig. Guidet tur ~90 min, køligt og eventyragtigt — børn elsker at udforske de underjordiske gange.</p>
-          <p class="top5-note">⚠️ Ikke planlagt — ligger centralt i det historiske center, nem at tilføje på dag 2 eller 4</p>
         </div>
       </li>
       <li>
@@ -398,35 +414,55 @@
   <div class="day-card" id="n-day5">
     <div class="day-header">
       <div class="day-num napoli-bg">5</div>
-      <div class="day-title"><h3>Torsdag 7. maj – Dagsudflugt: Procida &#127958;&#65039;</h3><small>Færge fra Molo Beverello · 10 minutters gang fra hotellet</small></div>
+      <div class="day-title"><h3>Torsdag 7. maj – MANN + Lungomare</h3><small>Napolis bedste museum + farvel til havet · Afslapning inden afrejse næste dag</small></div>
     </div>
     <div class="day-body">
       <div class="time-block">
-        <div class="time-label">09:00</div>
-        <div class="time-content"><strong>Færge fra Molo Beverello <span class="badge badge-tip">Tæt på hotellet!</span></strong>
-          <p>Molo Beverello er kun 10 minutters gang fra Via Pasquale Scura. Hurtigfærge (aliscafo) til Procida tager ca. 35–40 min. Caremar og NLG afgår fra Molo Beverello (ca. €12–14/voksen, halvpris børn 4–12 år, under 4 gratis). Tag en morgenfærge for at nå en hel dag på øen.</p>
-          <div class="day-ticket">&#127915; <a class="soon-link" href="https://shop.caremar.it/en/rates/" target="_blank" rel="noopener">Bestil Caremar-færgebilletter her →</a> &nbsp;|&nbsp; Sammenlign på <a class="soon-link" href="https://www.ferryhopper.com/en/ferries/italy/naples" target="_blank" rel="noopener">Ferryhopper.com →</a></div></div>
+        <div class="time-label">09:30</div>
+        <div class="time-content"><strong>Museo Archeologico Nazionale (MANN) <span class="badge badge-tip">Verdens bedste!</span></strong> <a class="maps-link" href="https://maps.google.com/?q=Museo+Archeologico+Nazionale+Napoli" target="_blank" rel="noopener">📍 Google Maps</a>
+          <div class="ratings"><span class="g-rating">⭐ 4,6/5</span> · <span class="ta-rating">🦉 Fremragende</span> (18.000+ anm.)</div>
+          <p>Et af verdens absolut bedste arkæologiske museer — og direkte forsmag på det I ser i Pompeji dagen efter. Det enorme mosaikgulv fra Alexanders slag, gibsafstøbninger fra Pompeji og Farnesernes Herkules fascinerer selv de mindste. Brug 2–2,5 timer. Kom tidligt — det er roligst om morgenen. 15 minutters gang eller ét stop med metro linje 1 (Museo) fra hotellet.</p>
+          <div class="day-ticket">&#128994; <strong>Ingen forudbooking nødvendig</strong> &nbsp;· €12/voksen · Børn under 18 gratis (EU) · Familie: ca. €24</div>
+        </div>
       </div>
       <div class="time-block">
-        <div class="time-label">Formiddag</div>
-        <div class="time-content"><strong>Marina Corricella <span class="badge badge-tip">Øens ikoniske postkortmotiv!</span></strong> <a class="maps-link" href="https://maps.google.com/?q=Marina+Corricella+Procida" target="_blank" rel="noopener">📍 Google Maps</a>
-          <div class="ratings"><span class="g-rating">⭐ 4,8/5</span> · <span class="ta-rating">🦉 Fremragende</span></div>
-          <p>10 minutters let gang fra færgeterminalen (Marina Grande). Procidas mest ikoniske havneby: pastelfarvet stakkede huse direkte ud til en stille fiskerihavn. Ingen biler, ingen turistbusser — bare genuint syditaliensk liv. Her blev <em>Il Postino</em> (1994) filmet. Lad børnene se fiskerne komme hjem og losse dagens fangst.</p></div>
+        <div class="time-label">12:00</div>
+        <div class="time-content"><strong>Frokost i Quartieri Spagnoli</strong> <a class="maps-link" href="https://maps.google.com/?q=Quartieri+Spagnoli+Napoli" target="_blank" rel="noopener">📍 Google Maps</a>
+          <p>15 minutters gang fra MANN. Napolis spanske kvarter er en labyrint af smalle gader med vasketøj over hovederne og ægte lokalt liv. Undgå de brede turistgader — find en trattoria inde i kvarterets indre og spis dagens ret (<em>piatto del giorno</em>). Billigere og mere autentisk end Centro Storico.</p>
+        </div>
+      </div>
+      <div class="options">
+        <div class="opt opt-a">
+          <div class="opt-label">&#9679; Mulighed A – Napoli Sotterranea</div>
+          <strong>Det underjordiske Napoli <span class="badge badge-gem">Skjult perle</span></strong> <a class="maps-link" href="https://maps.google.com/?q=Napoli+Sotterranea+Piazza+San+Gaetano+68" target="_blank" rel="noopener">📍 Google Maps</a>
+          <ul>
+            <li>40 km tunneller under gaderne — fra græske cisterner til 2. verdenskrigs tilflugtsrum</li>
+            <li>Guidet tur ca. 90 min · køligt og eventyragtigt · børnene elsker det</li>
+            <li>Piazza San Gaetano 68 · 15 min gang fra Quartieri Spagnoli</li>
+            <li>~€10/voksen · ~€5/barn · ingen forudbooking nødvendig, men anbefalet i maj</li>
+            <li>Afslut med gelato på Piazza del Plebiscito og en rolig gåtur hjem</li>
+          </ul>
+        </div>
+        <div class="opt opt-b">
+          <div class="opt-label">&#9679; Mulighed B – Chiaia + Lungomare</div>
+          <strong>Afslappet eftermiddag langs havet</strong> <a class="maps-link" href="https://maps.google.com/?q=Villa+Comunale+Napoli" target="_blank" rel="noopener">📍 Google Maps</a>
+          <ul>
+            <li>Gå ned til <strong>Villa Comunale</strong>-parken langs havnen — Alva kan lege frit på legepladsen</li>
+            <li>Videre ad Lungomare-promenaden med udsigt til Vesuvius — klapvognvenlig og rolig</li>
+            <li>Slut med gelato ved Mergellina</li>
+            <li>God mulighed for at spare kræfter inden morgendagens lange Pompeji-dag</li>
+          </ul>
+        </div>
       </div>
       <div class="time-block">
-        <div class="time-label">Frokost</div>
-        <div class="time-content"><strong>Frokost ved Marina Corricella</strong>
-          <p>Restauranterne langs havnekanten er autentiske og billigere end på Ischia eller Capri. Frisk blæksprutte, rejer og det lokale <em>coniglio all'ischitana</em> (kaningryde) er specialiteterne. Book ikke — find et bord ved vandet og se livet passere.</p></div>
+        <div class="time-label">19:00</div>
+        <div class="time-content"><strong>Afskedspizza i Napoli</strong>
+          <p>Sidste aften i Napoli — den skal fejres med byens bedste pizza. Gå til <strong>Pizzeria Sorbillo</strong> <a class="maps-link" href="https://maps.google.com/?q=Pizzeria+Sorbillo+Via+dei+Tribunali+Napoli" target="_blank" rel="noopener">📍 Via dei Tribunali 32</a> eller <strong>Di Matteo</strong> <a class="maps-link" href="https://maps.google.com/?q=Pizzeria+Di+Matteo+Napoli" target="_blank" rel="noopener">📍 Via dei Tribunali 94</a>. Kom kl. 18:30–19:00 for at undgå kø — begge steder har lang ventetid fra kl. 20.</p>
+        </div>
       </div>
-      <div class="time-block">
-        <div class="time-label">Eftermiddag</div>
-        <div class="time-content"><strong>Chiaia-stranden <span class="badge badge-tip">Perfekt for børn!</span></strong> <a class="maps-link" href="https://maps.google.com/?q=Spiaggia+di+Chiaia+Procida" target="_blank" rel="noopener">📍 Google Maps</a>
-          <p>10–15 minutters gang fra Marina Corricella. Procidas smukkeste strand: skærmet bugt, roligt turkist vand og sandstrand — ideel for den 3-årige. Havtemperatur i maj: 18–20°C. Badning er muligt, men tag badesko med hvis I er følsomme over for sten nær kanten.</p></div>
-      </div>
-      <div class="time-block">
-        <div class="time-label">Sen eftermiddag</div>
-        <div class="time-content"><strong>Færge tilbage til Napoli</strong>
-          <p>Tag en af de sene eftermiddagsfærger (~17:30–19:00, tjek aktuelle tider). Aftensmad i Napoli ved hjemkomst — I er tilbage i nærheden af Via dei Tribunali.</p></div>
+      <div class="tip-box">
+        <strong>💡 God dag at pakke tasker</strong>
+        I rejser til Agriturismo næste morgen (8. maj). Brug aftenen på at samle tingene — det gør morgenen langt nemmere med tre børn.
       </div>
     </div>
   </div>
@@ -453,7 +489,7 @@
           <div class="opt-label">&#9679; Mulighed B – Herculaneum på vejen</div>
           <strong>Stop ved Herculaneum (Ercolano)</strong> <a class="maps-link" href="https://maps.google.com/?q=Herculaneum+Ercolano" target="_blank" rel="noopener">📍 Google Maps</a>
           <div class="ratings"><span class="g-rating">⭐ 4,7/5</span> · <span class="ta-rating">🦉 Fremragende</span></div>
-          <p>Mindre og bedre bevaret end Pompeii – 2 timer er nok. Lettere med børn end det store Pompeii-kompleks. Ligger direkte på vejen sydover (motorvej A3). €16/voksen, børn under 18 gratis (EU).</p>
+          <p>Mindre og bedre bevaret end Pompeji – 2 timer er nok. Lettere med børn end det store Pompeji-kompleks. Ligger direkte på vejen sydover (motorvej A3). €16/voksen, børn under 18 gratis (EU).</p>
           <div class="day-ticket">&#127915; <a class="soon-link" href="https://ercolano.cultura.gov.it/tickets/?lang=en" target="_blank" rel="noopener">Køb billetter til Herculaneum – CoopCulture →</a></div>
         </div>
       </div>
@@ -464,8 +500,8 @@
           <p>Udpak og lær stedet at kende. Gården ligger i selve Pompei, så ruinerne er bogstaveligt talt et stenkast væk – I kan spotte dem allerede fra nærområdet. De fleste agritourismos serverer hjemmelavet aftensmad med lokale råvarer.</p></div>
       </div>
       <div class="tip-box">
-        <strong>&#128161; Lej bil fra Napoli</strong>
-        Fra og med denne dag er en lejebil stærkt anbefalet. Giver total fleksibilitet til Pompeii, Vesuvius og Amalfikysten. Book på forhånd og hent i Napoli. Husk: kørsel i Napoli by er kaotisk – det er nemmere at hente bilen ved lufthavnen efter ankomst eller just inden afrejse fra by-hotellet.
+        <strong>&#128161; Lejebil fra i dag</strong>
+        I henter lejebilen i dag — vent med det til I er klar til at køre mod Agriturismo, så I undgår at navigere med bil i Napolis kaotiske centro storico. Tag en taxa til billejestedet med bagagen. Fra Agriturismo og frem giver bilen fuld fleksibilitet til Pompeji, Vesuvius og Amalfikysten.
       </div>
     </div>
   </div>
@@ -484,8 +520,8 @@
       <li>
         <div class="top5-num agri-bg">1</div>
         <div class="top5-content">
-          <strong>Pompeji Arkæologisk Park <a class="badge badge-inplan" href="javascript:void(0)" onclick="goToDay('a-day7')">✓ Dag 7</a></strong>
-          <p>Absolut uomgængeligt og booket kl. 8:30. Gå Forum, Huset med Faun, bageriet og teatrene. Brug mindst 2-3 timer og tag vand og solhat med.</p>
+          <strong>Pompeji Arkæologisk Park <a class="badge badge-booked" href="javascript:void(0)" onclick="goToDay('a-day7')">BOOKET · Dag 7</a></strong>
+          <p>Indgår i den guidede tur kl. 10:40. Guiden viser Forum, Huset med Faun, bageriet og amphiteatret. Brug mindst 2–3 timer og tag vand og solhat med.</p>
         </div>
       </li>
       <li>
@@ -498,8 +534,8 @@
       <li>
         <div class="top5-num agri-bg">3</div>
         <div class="top5-content">
-          <strong>Vesuvius <a class="badge badge-inplan" href="javascript:void(0)" onclick="goToDay('a-day7')">✓ Dag 7</a></strong>
-          <p>30 minutters vandring til kraterkanten (700 m). Enestående udsigt over Napoli-bugten. Den 3-årige skal bæres det sidste stykke op.</p>
+          <strong>Vesuvius <a class="badge badge-booked" href="javascript:void(0)" onclick="goToDay('a-day7')">BOOKET · Dag 7</a></strong>
+          <p>30 minutters vandring til kraterkanten (700 m). Enestående udsigt over Napoli-bugten. Alva skal bæres det sidste stykke op.</p>
         </div>
       </li>
       <li>
@@ -524,40 +560,23 @@
   <div class="day-card" id="a-day7">
     <div class="day-header">
       <div class="day-num agri-bg">7</div>
-      <div class="day-title"><h3>Lørdag 9. maj – Pompeii &amp; Vesuvius</h3><small>Valg: En hel dag ved Pompeii · eller Pompeii + Vesuvius kombineret</small></div>
+      <div class="day-title"><h3>Lørdag 9. maj – Pompeji &amp; Vesuvius <span class="badge badge-booked">BOOKET</span></h3><small>Guidet tur · Mødested Via Roma 32, Pompei kl. 10:25 · 6 timer</small></div>
     </div>
     <div class="day-body">
       <div class="time-block">
-        <div class="time-label">Morgen</div>
-        <div class="time-content"><strong>Tidlig start – ankomst ved Pompeii kl. 8:30</strong> <a class="maps-link" href="https://maps.google.com/?q=Pompeii+Archaeological+Park" target="_blank" rel="noopener">📍 Google Maps</a>
-          <div class="ratings"><span class="g-rating">⭐ 4,7/5</span> · <span class="ta-rating">🦉 Fremragende</span> (24.412 anm.)</div>
-          <p>Pompeii er et kæmpe areal (66 hektar), og I bor bogstaveligt talt lige ved siden af. <em>Det er afgørende at komme tidligt</em> – om formiddagen er der langt færre turister og en mere behagelig temperatur. Tidsbestemt adgang er obligatorisk – max 20.000 besøgende pr. dag. Tag rigeligt med vand og snacks – der er begrænset mad inden for selve ruinerne.</p>
-          <div class="day-ticket">&#128308; <strong>Bestil straks!</strong> &nbsp;<a class="urgent-link" href="https://www.vivaticket.com/it/tour/parco-archeologico-di-pompei/2316" target="_blank" rel="noopener">Køb Pompeii-billetter på Vivaticket →</a> &nbsp;|&nbsp; €20/voksen · Børn under 18 gratis (EU)</div></div>
-      </div>
-      <div class="options">
-        <div class="opt opt-a">
-          <div class="opt-label">&#9679; Mulighed A – Kun Pompeii (hel dag)</div>
-          <strong>Fordyb jer i Pompeii</strong>
-          <ul>
-            <li>Entré: ca. €16/voksen, børn under 18 år gratis (EU-statsborgere)</li>
-            <li>Vigtigste steder: Forum, Huset af Faun, Lupanar, det antikke bageri, Termerne, Amphiteatret</li>
-            <li>Brug 3–4 timer – det er rigeligt med børn</li>
-            <li>Tag madpakker med, eller find en restaurant i Pompei-by – ikke turiststederne lige ved indgangen</li>
-            <li>Perfekt hvis den 3-årige trænger til pauser og fri leg</li>
-          </ul>
+        <div class="time-label">10:25</div>
+        <div class="time-content">
+          <strong>Fremmøde – Via Roma 32, Pompei</strong> <a class="maps-link" href="https://maps.google.com/?q=Via+Roma+32,+80045+Pompei+NA,+Italia" target="_blank" rel="noopener">📍 Google Maps</a>
+          <p>Mødested ved siden af Pasticceria De Vivo. Ankom senest 15 min. før – mister I tidsvinduet, refunderes billetten ikke. Husk pas eller ID-kort til alle 5.</p>
+          <div class="day-ticket">&#9989; <strong>BOOKET</strong> &nbsp;Pompeji &amp; Vesuv-tur · GYG ref: <strong>GYGKBGFQRZ6N</strong> · Udbyder: <a href="tel:+390810201145">+39 081 020 1145</a></div>
         </div>
-        <div class="opt opt-b">
-          <div class="opt-label">&#9679; Mulighed B – Pompeii + Vesuvius</div>
-          <strong>Kombiner begge seværdigheder</strong>
-          <ul>
-            <li>Pompeii kl. 8:30–12:00 (kompakt rute: Forum, Huset af Faun, Amphitheater)</li>
-            <li>Kør op til <strong>Vesuvius</strong> <a class="maps-link" href="https://maps.google.com/?q=Mount+Vesuvius+Ercolano" target="_blank" rel="noopener">📍 Google Maps</a> kl. 13:00 (ca. 25 min kørsel)
-            <div class="ratings"><span class="g-rating">⭐ 4,5/5</span> · <span class="ta-rating">🦉 Fremragende</span></div></li>
-            <li>Parkér ved P-plads, gå 30 min op til kraterkanten (700 m sti)</li>
-            <li>Entré Vesuvius: €10/voksen · 6–25 år €8 · Under 6 gratis · Guide inkluderet</li>
-            <li>NB: Stien er stejl og gruset – den 3-årige skal bæres eller sidde i bæresele</li>
-          </ul>
-          <div class="day-ticket">&#128308; <strong>Bestil straks!</strong> &nbsp;<a class="urgent-link" href="https://www.parconazionaledelvesuvio.it/en/visit-the-park/the-paths/the-great-cono-2-2/" target="_blank" rel="noopener">Køb Vesuvius-billetter – Nationalparken →</a> &nbsp;|&nbsp; Forudbestilling online er obligatorisk</div>
+      </div>
+      <div class="time-block">
+        <div class="time-label">10:40–16:40</div>
+        <div class="time-content">
+          <strong>Guidet tur på engelsk – Pompeji + Vesuvius (6 timer)</strong>
+          <div class="ratings"><span class="g-rating">⭐ 4,7/5</span> Pompeji · <span class="g-rating">⭐ 4,5/5</span> Vesuvius</div>
+          <p>Entrébilletter til begge seværdigheder er inkluderet. Stien op til Vesuvius-krateret er 700 m og stejl – Alva skal bæres eller sidde i bæresele. Turen slutter samme sted som start (Via Roma). Hvis Vesuvius er lukket pga. vejr → besøget i Herculaneum inkluderes automatisk i stedet.</p>
         </div>
       </div>
       <div class="time-block">
@@ -566,12 +585,8 @@
           <p>Tilbage til Vivi Natura og hjemmelavet middag med gårdens egne råvarer. En rolig aften til at samle kræfter.</p></div>
       </div>
       <div class="tip-box">
-        <strong>&#128161; Tips til Pompeii med børn</strong>
-        Tag et lydguide-sæt (lejes ved indgangen) eller en børnevenlig guidebog. Den kraftige majsol kan gøre den mindste træt – hat, solcreme og rigeligt vand er et must. De størknet menneskefigurer (gibsafstøbninger) fascinerer og giver et naturligt afsæt for at tale om historien.
-      </div>
-      <div class="warning-box">
-        <strong>&#9888;&#65039; Undgå uofficielle guides ved Pompeii</strong>
-        Ved indgangen tilbyder folk sig som guides – kun officielt licenserede guides er troværdige. Book evt. en officiel guide på forhånd via pompeiisite.org.
+        <strong>&#128161; Tips til dagen</strong>
+        Turen er på engelsk og guide er inkluderet — I behøver ikke tænke på lydguider. Tag rigeligt vand og solhat til alle; majsolen er hård på kraterstien. Gibsafstøbningerne af de begravede mennesker fascinerer børn og giver et naturligt afsæt for at tale om historien. Turen slutter ved mødestedet (Via Roma) — hold familien samlet.
       </div>
     </div>
   </div>
@@ -683,8 +698,8 @@
     <div class="day-body">
       <div class="time-block">
         <div class="time-label">Formiddag</div>
-        <div class="time-content"><strong>Bus til Ravello (ca. 20 min)</strong>
-          <p>SITA-bus kører regelmæssigt fra Amalfi. Alternativt: taxa. Ravello er et must – og perfekt til en formiddag med børn der kan løbe frit i haverne.</p></div>
+        <div class="time-content"><strong>Kør til Ravello (ca. 25 min)</strong> <a class="maps-link" href="https://maps.google.com/?q=Ravello+Italy" target="_blank" rel="noopener">📍 Google Maps</a>
+          <p>Parkér ved indkørslen til byen — Ravello er bilfrit i centrum. SITA-bus fra Amalfi er alternativet hvis I hellere vil parkere bilen. Ravello er et must og perfekt til en formiddag med børn, der kan løbe frit i haverne.</p></div>
       </div>
       <div class="time-block">
         <div class="time-label">Formiddag</div>
@@ -762,7 +777,7 @@
       <div class="time-block">
         <div class="time-label">Formiddag</div>
         <div class="time-content"><strong>Grotta dello Smeraldo <span class="badge badge-tip">Begge muligheder starter her!</span></strong> <a class="maps-link" href="https://maps.google.com/?q=Grotta+dello+Smeraldo+Amalfi" target="_blank" rel="noopener">📍 Google Maps</a>
-          <p>Kun 4 km vest for Amalfi langs SS163. Tag bussen (SITA, ca. 10 min) eller taxa. Adgang via elevator ned til vandoverfladen — så robåd ind i grotten (€5/person). Det grønlig-turkise lys er magisk og kommer fra naturligt sollys der reflekteres under vandet. Turen tager ca. 45 min inkl. transport.</p></div>
+          <p>Kun 4 km vest for Amalfi langs SS163. Kør selv og parkér ved siden af (nemmest), eller tag SITA-bussen (ca. 10 min). Adgang via elevator ned til vandoverfladen — så robåd ind i grotten (€5/person). Det turkise lys er magisk og opstår ved naturligt sollys, der reflekteres under vandet. Turen tager ca. 45 min.</p></div>
       </div>
       <div class="options">
         <div class="opt opt-a">
@@ -828,40 +843,26 @@
 
     <div class="ticket-grid">
 
-      <div class="ticket-card urgent">
-        <span class="urgency-tag">&#128308; Bestil straks</span>
-        <h4>Pompeii – Parco Archeologico</h4>
+      <div class="ticket-card relaxed">
+        <span class="urgency-tag">&#9989; Booket</span>
+        <h4>Pompeji &amp; Vesuvius – Guidet tur · 9. maj kl. 10:40</h4>
         <div class="price">
-          <strong>€20 / voksen</strong> · Børn under 18 år: <strong>gratis</strong> (EU-statsborgere)<br/>
-          Familie (2 voksne + 3 børn): <strong>ca. €40 i alt</strong><br/>
-          Obligatorisk tidsbestilling – maks. 20.000 besøgende pr. dag. Tidspladser er udsolgt uger i forvejen i maj.
+          Inkluderet i guidet tur via GetYourGuide (VISITING CAMPANIA S.R.L.)<br/>
+          Mødested: <strong>Via Roma 32, Pompei</strong> · Fremmøde senest kl. 10:25<br/>
+          Ref: <strong>GYGKBGFQRZ6N</strong> · Udbyder: +39 081 020 1145
         </div>
-        <a class="buy-btn" href="https://www.vivaticket.com/it/tour/parco-archeologico-di-pompei/2316" target="_blank" rel="noopener">Køb billetter på Vivaticket →</a>
-        <div class="note">Officiel billetsalgspartner for Pompei fra marts 2026. Billetter er personlige – navn skal oplyses ved bestilling.</div>
+        <div class="note">Husk pas/ID-kort til alle 5 · Afbestil inden kl. 10:40 den 8. maj for fuld refusion</div>
       </div>
 
-      <div class="ticket-card urgent">
-        <span class="urgency-tag">&#128308; Bestil straks</span>
-        <h4>Vesuvius – Gran Cono kratervandring</h4>
+      <div class="ticket-card relaxed">
+        <span class="urgency-tag">&#128994; Ingen forudbooking</span>
+        <h4>MANN – Museo Archeologico Nazionale · 7. maj</h4>
         <div class="price">
-          <strong>€10 / voksen</strong> · Under 6 år: <strong>gratis</strong> · 6–25 år: <strong>€8</strong><br/>
-          Familie (2 voksne + 2 børn over 6 + 1 under 6): <strong>ca. €36 i alt</strong><br/>
-          Forudbestilling online er <em>obligatorisk</em> – der sælges ikke billetter ved indgangen. Guide er inkluderet i prisen.
+          <strong>€12 / voksen</strong> · Børn under 18 år: <strong>gratis</strong> (EU) · Familie: ca. <strong>€24</strong><br/>
+          Åbent 09:00–19:30 (lukket tirsdage). Betales ved indgangen eller online.
         </div>
-        <a class="buy-btn" href="https://www.parconazionaledelvesuvio.it/en/visit-the-park/the-paths/the-great-cono-2-2/" target="_blank" rel="noopener">Køb billetter – Vesuvius Nationalpark →</a>
-        <div class="note">Billetter sættes til salg 30 dage i forvejen. 20 % af pladserne reserveres til køb på dagen – disse frigives én time inden afgang.</div>
-      </div>
-
-      <div class="ticket-card soon">
-        <span class="urgency-tag">&#128993; Bestil inden afrejse</span>
-        <h4>Færge Napoli ↔ Procida</h4>
-        <div class="price">
-          <strong>€12–14 / voksen</strong> (hurtigfærge fra Molo Beverello, ~35 min) · Børn 4–12 år: ca. <strong>halvpris</strong> · Under 4 år: <strong>gratis</strong><br/>
-          Familie tur-retur: <strong>ca. €60–80</strong><br/>
-          Caremar og NLG afgår fra Molo Beverello, som er 10 min gang fra jeres hotel. Bestil 2–3 uger i forvejen i maj.
-        </div>
-        <a class="buy-btn" href="https://shop.caremar.it/en/rates/" target="_blank" rel="noopener">Køb billetter – Caremar →</a>
-        <div class="note">Sammenlign alle operatører på <a href="https://www.ferryhopper.com/en/ferries/italy/naples" target="_blank" rel="noopener">Ferryhopper.com</a>. Vælg Molo Beverello som afgangssted og Procida som destination.</div>
+        <a class="buy-btn" href="https://mann-napoli.it/en/tickets/" target="_blank" rel="noopener">Billetter – MANN →</a>
+        <div class="note">Piazza del Plebiscito og Lungomare-promenaden samme dag er gratis.</div>
       </div>
 
       <div class="ticket-card soon">
@@ -873,20 +874,9 @@
           Kun relevant hvis I vælger stop ved Herculaneum på vejen (dag 6). Gratis første søndag i måneden – 3. maj er en søndag, men da er I stadig i Napoli.
         </div>
         <a class="buy-btn" href="https://ercolano.cultura.gov.it/tickets/?lang=en" target="_blank" rel="noopener">Køb billetter – CoopCulture →</a>
-        <div class="note">Billetter sættes til salg 3–4 måneder i forvejen. Stedet er langt mere roligt end Pompeii – oplagt med børn.</div>
+        <div class="note">Billetter sættes til salg 3–4 måneder i forvejen. Stedet er langt mere roligt end Pompeji – oplagt med børn.</div>
       </div>
 
-      <div class="ticket-card relaxed">
-        <span class="urgency-tag">&#128994; Ingen billet nødvendig</span>
-        <h4>Marina Corricella + Chiaia Strand, Procida</h4>
-        <div class="price">
-          <strong>Gratis adgang</strong> til Marina Corricella og Chiaia-stranden<br/>
-          Kun udgifter: frokost ved havnen og evt. solsenge/parasol på stranden<br/>
-          Procida er markant billigere end Ischia og Capri — restauranter, is og café er til lokale priser.
-        </div>
-        <a class="buy-btn" href="https://www.ferryhopper.com/en/ferries/italy/naples" target="_blank" rel="noopener">Tjek færgetider – Ferryhopper →</a>
-        <div class="note">Adgang via elevator og gangbro til borgen er inkluderet i billetprisen. Åbent dagligt kl. 9 til solnedgang.</div>
-      </div>
 
       <div class="ticket-card relaxed">
         <span class="urgency-tag">&#128994; Kan købes på dagen</span>
@@ -949,6 +939,16 @@
       </ul>
     </div>
     <div class="info-card">
+      <h4>&#127755; Pompeji &amp; Vesuv-tur · 9. maj</h4>
+      <ul>
+        <li>Mødested: Via Roma 32, Pompei (v. Pasticceria De Vivo)</li>
+        <li>Fremmøde senest <strong>kl. 10:25</strong> · Afgang kl. 10:40 · 6 timer</li>
+        <li>Ref: <strong>GYGKBGFQRZ6N</strong> · Udbyder: +39 081 020 1145</li>
+        <li>Husk: pas/ID-kort til alle 5 · ingen stor bagage</li>
+        <li>Afbestil inden kl. 10:40 den 8. maj for fuld refusion</li>
+      </ul>
+    </div>
+    <div class="info-card">
       <h4>&#128300; Città della Scienza · 6. maj</h4>
       <ul>
         <li><strong>Ombyt kuponer i billetkontoret!</strong></li>
@@ -989,7 +989,7 @@
     <ul>
       <li><strong>Restauranter ved Piazza del Plebiscito og Piazza Municipio</strong> – turistpriser.</li>
       <li><strong>"Menu Turistico"-skilte</strong> – du betaler for at være turist, ikke for maden.</li>
-      <li><strong>Uofficielle guides ved Pompeii</strong> – kun licenserede guides er troværdige.</li>
+      <li><strong>Uofficielle guides ved Pompeji</strong> – kun licenserede guides er troværdige.</li>
       <li><strong>Taxi uden taxameter</strong> – aftal altid pris på forhånd.</li>
       <li><strong>Restauranter direkte ved Amalfi-domkirken</strong> – gå ad sidegaderne.</li>
       <li><strong>Limoncello fra souvenirishops</strong> – køb det i et supermarked eller en rigtig specialforretning.</li>
@@ -1024,8 +1024,8 @@
   <div class="info-card">
     <ul>
       <li><strong>Lufthavn → Napoli centrum:</strong> Taxi (ca. €20–25, insistér på meter) eller Alibus</li>
-      <li><strong>Molo Beverello (færgehavn):</strong> 10 min gang fra hotel 1. Procida, Capri, Sorrento</li>
-      <li><strong>Circumvesuviana-toget:</strong> Napoli Centrale → Pompeii Scavi, 35 min, ~€3 p.p.</li>
+      <li><strong>Molo Beverello (færgehavn):</strong> 10 min gang fra hotellet i Napoli · Færger til Capri, Ischia og Sorrento</li>
+      <li><strong>Circumvesuviana-toget:</strong> Napoli Centrale → Pompeji (Pompei Scavi), 35 min, ~€3 pr. person</li>
       <li><strong>SITA-bus:</strong> Amalfi ↔ Sorrento ↔ Positano ↔ Praiano, ca. €2,50/tur</li>
       <li><strong>Hurtigbåde:</strong> Forbinder alle kystbyer om sommeren, ca. €10–15/tur</li>
       <li><strong>Amalfi → NAP lufthavn:</strong> Mindst 2,5 timer i bil. Afrejse <u>senest kl. 07:00</u> den 14. maj!</li>
@@ -1033,14 +1033,123 @@
   </div>
 </section>
 
+<!-- ══════════════════════════════════════════ PAKKELISTE ══════════════════ -->
+<section id="pakkeliste" class="section">
+  <div class="phase-heading pakke-border">
+    <h2>&#129523; Pakkeliste</h2>
+    <p>Kryds af efterhånden som du pakker — fremskridt gemmes i browseren</p>
+  </div>
+
+  <div class="pakke-progress-label">
+    <span id="pakke-label">0 af 0 varer pakket</span>
+    <button class="pakke-reset" onclick="nulstilPakkeliste()">Nulstil alle</button>
+  </div>
+  <div class="pakke-progress-wrap">
+    <div class="pakke-progress-bar" id="pakke-bar"></div>
+  </div>
+
+  <div class="pakke-grid">
+
+    <!-- Dokumenter & Rejse -->
+    <div class="pakke-card">
+      <h4>📄 Dokumenter &amp; Rejse</h4>
+      <label class="pakke-item"><input type="checkbox" data-id="pas-jacob"> <span>Pas – Jacob</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="pas-tina"> <span>Pas – Tina</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="pas-freja"> <span>Pas – Freja (10 år)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="pas-saga"> <span>Pas – Saga (7 år)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="pas-alva"> <span>Pas – Alva (3 år)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="flybilletter"> <span>Flybilletter (print eller digital)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="rejseforsikring"> <span>Rejseforsikring (dokumentation)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="sygesikringskort"> <span>EU-sygesikringskort (alle 5)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="hotelbookinger"> <span>Hotel-bookinger (print/offline)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="nodkontakter"> <span>Nødkontakter noteret ned</span></label>
+    </div>
+
+    <!-- Tøj -->
+    <div class="pakke-card">
+      <h4>👕 Tøj</h4>
+      <label class="pakke-item"><input type="checkbox" data-id="tshirts"> <span>T-shirts (7–8 stk.)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="shorts"> <span>Shorts / kjole (3–4 stk.)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="bukser"> <span>Lette bukser/jeans (2 par)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="skjorter"> <span>Skjorter/bluser til aften (2 stk.)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="undertoj"> <span>Undertøj (10+ stk.)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="sokker"> <span>Sokker (10 par)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="jakke"> <span>Let jakke / cardigan (til aftener)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="badetoj"> <span>Badetøj (2 sæt pr. person)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="pyjamas"> <span>Pyjamas</span></label>
+    </div>
+
+    <!-- Sko & Tilbehør -->
+    <div class="pakke-card">
+      <h4>👟 Sko &amp; Tilbehør</h4>
+      <label class="pakke-item"><input type="checkbox" data-id="gasko"> <span>Behagelige gåsko – vigtig! (brosten i Napoli)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="sandaler"> <span>Sandaler</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="flipflops"> <span>Flipflops / badesko</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="solbriller"> <span>Solbriller (alle i familien)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="hatte"> <span>Kasket / hat (mod solen)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="rygsak"> <span>Dagstur-rygsæk</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="baeltetaske"> <span>Bæltetaske (mod lommetyve)</span></label>
+    </div>
+
+    <!-- Toiletartikler & Medicin -->
+    <div class="pakke-card">
+      <h4>🧴 Toiletartikler &amp; Medicin</h4>
+      <label class="pakke-item"><input type="checkbox" data-id="solcreme"> <span>Solcreme høj faktor (alle størrelser)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="eftersol"> <span>Efter-sol lotion</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="myggespray"> <span>Myggespray</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="smertestillende"> <span>Smertestillende (Panodil / ibuprofen)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="mavemedicin"> <span>Mavemedicin (rejsediarré o.l.)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="plastere"> <span>Plastere + forbindingsgrej</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="handsprit"> <span>Håndsprit</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="tandborste"> <span>Tandbørster + tandpasta</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="shampoo"> <span>Shampoo + balsam</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="deodorant"> <span>Deodorant</span></label>
+    </div>
+
+    <!-- Elektronik -->
+    <div class="pakke-card">
+      <h4>🔌 Elektronik</h4>
+      <label class="pakke-item"><input type="checkbox" data-id="telefoner"> <span>Telefoner + opladere</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="stikadapter"> <span>EU-stikadapter (Italia: type F/L)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="powerbank"> <span>Powerbank (ladt op)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="kamera"> <span>Kamera + batteri + hukommelseskort</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="horetelefoner"> <span>Høretelefoner</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="tablet"> <span>iPad / tablet (til børnene)</span></label>
+    </div>
+
+    <!-- Strand & Aktiviteter -->
+    <div class="pakke-card">
+      <h4>🏖️ Strand &amp; Aktiviteter</h4>
+      <label class="pakke-item"><input type="checkbox" data-id="strandhandklaeder"> <span>Strandhåndklæder</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="strandtaske"> <span>Strandtaske</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="snorkel"> <span>Snorkeludstyr (evt.)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="svommevinger"> <span>Svømmevinger / badearme til lille</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="legetoj"> <span>Legetøj til stranden (spand, skovl)</span></label>
+    </div>
+
+    <!-- Penge & Praktisk -->
+    <div class="pakke-card">
+      <h4>💶 Penge &amp; Praktisk</h4>
+      <label class="pakke-item"><input type="checkbox" data-id="eurokontanter"> <span>Euro-kontanter</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="kreditkort"> <span>Kreditkort (Visa/Mastercard)</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="mobilpay"> <span>Revolut / rejsekort sat op</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="vandflaske"> <span>Genanvendelig vandflaske</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="snacks"> <span>Snacks + saftevand til fly</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="rejsepude"> <span>Nakkepude til fly</span></label>
+      <label class="pakke-item"><input type="checkbox" data-id="orepropper"> <span>Ørepropper</span></label>
+    </div>
+
+  </div>
+</section>
+
 <footer>
-  Udkast til rejseplan · Napoli, Pompeii &amp; Amalfikysten · 3–14. maj 2026<br/>
+  Udkast til rejseplan · Napoli, Pompeji &amp; Amalfikysten · 3–14. maj 2026<br/>
   Husk: Planen er et forslag – vær spontane og nyd rejsen!
 </footer>
 
 <script>
 // ── Tab navigation ──────────────────────────────────────────────────────────
-const tabClasses = { napoli:'active-napoli', agri:'active-agri', amalfi:'active-amalfi', info:'active-info' };
+const tabClasses = { napoli:'active-napoli', agri:'active-agri', amalfi:'active-amalfi', info:'active-info', pakkeliste:'active-pakke' };
 
 function showTab(id, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -1062,6 +1171,42 @@ function goToDay(id) {
   }
   setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 }
+
+// ── Pakkeliste ───────────────────────────────────────────────────────────────
+function initPakkeliste() {
+  const boxes = document.querySelectorAll('#pakkeliste input[type=checkbox]');
+  boxes.forEach(cb => {
+    if (localStorage.getItem('pakke-' + cb.dataset.id) === '1') {
+      cb.checked = true;
+      cb.closest('.pakke-item').classList.add('done');
+    }
+    cb.addEventListener('change', () => {
+      cb.closest('.pakke-item').classList.toggle('done', cb.checked);
+      localStorage.setItem('pakke-' + cb.dataset.id, cb.checked ? '1' : '0');
+      updateProgress();
+    });
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const boxes = document.querySelectorAll('#pakkeliste input[type=checkbox]');
+  const done = [...boxes].filter(b => b.checked).length;
+  const pct = boxes.length ? Math.round(done / boxes.length * 100) : 0;
+  document.getElementById('pakke-bar').style.width = pct + '%';
+  document.getElementById('pakke-label').textContent = done + ' af ' + boxes.length + ' varer pakket';
+}
+
+function nulstilPakkeliste() {
+  document.querySelectorAll('#pakkeliste input[type=checkbox]').forEach(cb => {
+    cb.checked = false;
+    cb.closest('.pakke-item').classList.remove('done');
+    localStorage.removeItem('pakke-' + cb.dataset.id);
+  });
+  updateProgress();
+}
+
+initPakkeliste();
 </script>
 </body>
 </html>
